@@ -1,0 +1,17 @@
+{
+  "platforms": [
+    "apple",
+    "android"
+  ],
+  "apple": {
+    "podspecPath": "GLMapLab.podspec",
+    "modules": [
+      "GLMapDemoModule"
+    ]
+  },
+  "android": {
+    "modules": [
+      "software.globus.lab.reactnative.GLMapDemoModule"
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "releaseVersion": "2.2.0",
+  "status": "unreleased; local validation uses an explicit GLMAP_SDK_DIR",
+  "sourceRevision": "b5ed76b9b68d5651f1eb78f317dcc6fcc93cceb3",
+  "swiftPackage": "https://github.com/GLMap/GLMapSwift.git",
+  "androidRepository": "https://maven.globus.software/artifactory/libs",
+  "minimumIOS": "16.4",
+  "minimumAndroid": 24
+}

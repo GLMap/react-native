@@ -1,0 +1,21 @@
+apply plugin: 'com.android.library'
+apply plugin: 'expo-module-gradle-plugin'
+group = 'software.globus'
+version = '0.1.0-beta.1'
+def sdkDirectory = System.getenv('GLMAP_SDK_DIR')
+def sdkVersion = sdkDirectory ? new groovy.json.JsonSlurper().parse(new File(sdkDirectory, 'sdk.json')).version : '2.2.0'
+rootProject.allprojects {
+  repositories {
+    if (sdkDirectory) maven { url new File(sdkDirectory, 'maven').toURI() }
+    maven { url 'https://maven.globus.software/artifactory/libs' }
+  }
+}
+android {
+  namespace 'software.globus.lab.testsupport'
+  defaultConfig { minSdkVersion 24; versionCode 1; versionName '0.1.0-beta.1' }
+}
+dependencies {
+  implementation "globus:glmap:${sdkVersion}"
+  implementation "globus:glsearch:${sdkVersion}"
+  implementation "globus:glroute:${sdkVersion}"
+}

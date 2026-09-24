@@ -1,0 +1,17 @@
+{
+  "platforms": [
+    "apple",
+    "android"
+  ],
+  "apple": {
+    "podspecPath": "GLMapTestSupport.podspec",
+    "modules": [
+      "GLMapLabModule"
+    ]
+  },
+  "android": {
+    "modules": [
+      "software.globus.lab.reactnative.GLMapLabModule"
+    ]
+  }
+}

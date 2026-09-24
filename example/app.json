@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "GLMap React Native Lab",
+    "slug": "glmap-react-native-lab",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "software.globus.lab.glmaprn"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "software.globus.lab.glmaprn"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "scheme": "glmap-rn-lab",
+    "plugins": [
+      "glmap-rn",
+      "./plugins/with-tests"
+    ]
+  }
+}

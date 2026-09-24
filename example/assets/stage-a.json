@@ -1,0 +1,16 @@
+{
+  "id": "stage-a-v1",
+  "camera": {"latitude": 49.0, "longitude": 16.0, "zoom": 5.0},
+  "marker": {"latitude": 50.0755, "longitude": 14.4378},
+  "track": {
+    "type": "FeatureCollection",
+    "features": [{
+      "type": "Feature",
+      "properties": {"name": "Prague — Vienna — Budapest"},
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [[14.4378, 50.0755], [16.3738, 48.2082], [19.0402, 47.4979]]
+      }
+    }]
+  }
+}

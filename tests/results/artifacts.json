@@ -1,0 +1,17 @@
+{
+  "nativeRevision": "b5ed76b9b68d5651f1eb78f317dcc6fcc93cceb3",
+  "nativeVersion": "2.2.0-dev.b5ed76b9b",
+  "androidBuildIDs": {
+    "glmapcore": "89be51932ae43de8f5d8ff654021ac3526763c3b",
+    "glmap": "850951e981ff44ac461c2b65c412daebded34ede",
+    "glsearch": "1826f95ae4b3a82bccadfa187090f578ceb12b5f",
+    "glroute": "9dc50ffa8ef5a112dadbc0a46e2efe19fca5ec5c"
+  },
+  "applePlatform": "device",
+  "appleUUIDs": {
+    "GLMapCore": "A28BDAAB-7CFC-3825-B4AE-2D991D4A3DE1",
+    "GLMap": "601EE883-ACF2-3429-BA11-22399BAEEAEF",
+    "GLSearch": "C08F7740-6FE8-32AB-A383-38EF696E8EF2",
+    "GLRoute": "E5F9AE6A-DADA-3136-B741-2655B1F94E3D"
+  }
+}

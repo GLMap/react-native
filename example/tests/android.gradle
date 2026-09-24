@@ -1,0 +1,10 @@
+// Kept outside Expo's generated native project so prebuild preserves UI tests.
+android {
+    defaultConfig { testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner" }
+    sourceSets { androidTest.java.srcDirs += ["../../tests/android"] }
+}
+dependencies {
+    androidTestImplementation "androidx.test:runner:1.6.2"
+    androidTestImplementation "androidx.test.ext:junit:1.2.1"
+    androidTestImplementation "androidx.test.uiautomator:uiautomator:2.3.0"
+}
