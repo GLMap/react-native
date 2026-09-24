@@ -2,8 +2,8 @@ import GLMap
 import ExpoModulesCore
 import GLMapCore
 
-/// Lab-only timings. Uses the same public builder and update result as the wrapper.
-final class LabBenchmark {
+/// Benchmark-only timings. Uses the same public builder and update result as the wrapper.
+final class MapBenchmark {
     private let map: GLMapView
     private let layer = GLMapVectorLayer(drawOrder: 3)
     private let styles = ["#E74C3C", "#2650D6"].map { GLMapVectorCascadeStyle.createStyle("line{width:4pt;color:\($0);}")! }
@@ -80,5 +80,5 @@ final class LabBenchmark {
         return objects.object(at: 0).asGeoJSON()
     }
     func dispose() { map.remove(layer); objects = nil; inputs.removeAll() }
-    private func error(_ message: String) -> NSError { NSError(domain: "GLMapLabBench", code: 1, userInfo: [NSLocalizedDescriptionKey: message]) }
+    private func error(_ message: String) -> NSError { NSError(domain: "GLMapBenchmark", code: 1, userInfo: [NSLocalizedDescriptionKey: message]) }
 }

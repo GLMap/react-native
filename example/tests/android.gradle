@@ -1,5 +1,7 @@
 // Kept outside Expo's generated native project so prebuild preserves UI tests.
 android {
+    // Release tests exercise the bundled default catalog without a Metro server.
+    testBuildType providers.gradleProperty('glmapTestBuildType').getOrElse('debug')
     defaultConfig { testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner" }
     sourceSets { androidTest.java.srcDirs += ["../../tests/android"] }
 }

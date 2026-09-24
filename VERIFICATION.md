@@ -1,39 +1,200 @@
-# Modular React Native verification — 2026-09-24
+# React Native SDK verification
 
-Final combined-build native baseline: `515481f9f`; frozen Swift package: `04f1a99`.
+## Host checks
 
-Completed:
+Use the toolchain in [README.md](README.md#requirements). From the repository root:
 
-- Independent npm/Expo packages under `@globus-software`; Map/Search/Route depend only on Core.
-- Full Android Release/R8 and iOS Release API checks: **6/6 on each**, including service
-  geometry handoff, Search's Map query capability, stale handles and unmount behavior.
-- Independently packaged Core/Search/Route probes run without the renderer on Android
-  Release/R8 and iOS Release. The iOS XCUITest suite passes **3/3**; Android checks the
-  displayed result. Their native library/framework lists are retained.
-- Controlled request-identity regressions pass separately for Core, Search and Route.
-- Controlled Core download and iOS user-location visibility regressions pass.
-- An unsigned modular iOS device archive succeeds.
-- TypeScript, podspec syntax and npm package contents pass. Large demo datasets,
-  benchmark code, native SDK binaries and build outputs are excluded from the packages.
+```sh
+npm install
+npm run typecheck --workspace example
+node --test tests/example.test.cjs
+python3 scripts/check-modules.py
+python3 tests/run.py
+python3 tests/downloads.py
+python3 tests/readiness.py
+```
 
-The separate headless probes initially used native `b5ed76b9b` with the same frozen
-Swift source. Combined tests were then rerun on `515481f9f`. Probe generator:
-`scripts/create-headless-probes.py --output <isolated-directory>`; build generated
-apps with their selected config plugins before running `tests/headless-ios`.
+The module check enforces Core-only dependencies. The controlled regressions
+compile current native method bodies against platform doubles: Kotlin on the JVM
+and Swift on macOS. They use Kotlin 2.4.20 and coroutines 1.10.2 from the Gradle
+cache; resolve the project's dependencies first on a fresh machine.
 
-Two real integration failures were exposed and fixed:
+`tests/run.py` checks request identity for Core, Search and Route, including late
+callbacks and reused IDs, plus iOS location-marker visibility. The
+[download regressions](tests/downloads/README.md) check cancellation and file
+ownership. These are host tests, not mobile runtime or network tests.
 
-- Android Search's SDK span templates must implement `Cloneable`; the retained
-  override is now protected from R8 and exercised by a real offline query.
-- CocoaPods reused its root project UUID when RN appended SwiftPM product objects.
-  The packaged Core config plugin checks existing UUIDs before accepting newly
-  allocated ones. This fixes a reproducible Route-only project corruption, without
-  modifying users' gems or React Native sources.
+To review package contents and podspec syntax without uploading packages:
 
-Earlier ownership rules remain: Core alone links the static CoreSwift conveniences;
-features link binary-only native products; declared header/asset compatibility paths
-and aligned products prevent duplicate archive signatures.
+```sh
+for package in glmap-core glmap glsearch glroute; do
+  npm pack --dry-run --workspace="@globus-software/$package"
+done
+ruby -c packages/glmap-core/GlobusMapCore.podspec
+ruby -c packages/glmap/GlobusMap.podspec
+ruby -c packages/glsearch/GlobusSearch.podspec
+ruby -c packages/glroute/GlobusRoute.podspec
+```
 
-Limits: no physical-device, signed-install, complete service-catalog/network or new
-Reload-UI certification. The pinned Expo dependency tree has moderate advisory warnings;
-it was not force-upgraded. No registry upload or remote creation was performed.
+Inspect the file lists for keys, caches, build output, large demo fixtures and
+native SDK binaries. A package dry-run is not dependency-resolution or runtime
+validation.
+
+## Native API and lifecycle checks
+
+Prepare the native example host as described in [Run the demo](README.md#run-the-demo).
+Select the API-test entry when building the app from `example/`:
+
+```sh
+EXPO_PUBLIC_GLMAP_API_TESTS=1 npx expo run:android --variant release
+# On macOS:
+EXPO_PUBLIC_GLMAP_API_TESTS=1 npx expo run:ios --configuration Release
+```
+
+The `DemoApiChecks.tsx` entry exercises camera/state operations, concurrent work,
+drawable ownership, stale handles, unmount and cross-module service geometry.
+Collect fresh results separately on each platform. A Release build alone does not
+prove that the checks ran.
+
+The default app opens the catalog. Its **API checks** action runs the six public
+API scenarios above, while **Lifecycle checks** opens `LifecycleApp.tsx` and runs
+eight public-map lifecycle scenarios. Both use `@globus-software/glmap`, not the
+private benchmark view. Lifecycle coverage includes concurrent captures, copied
+vector input, two-map isolation, camera restoration, ten remounts, invalidated
+handles and settlement during unmount. Result persistence is the only native
+test-support API used by these screens.
+
+For native gesture, keyboard, rotation, navigation and background/resume checks,
+build the **default catalog** without diagnostic flags. The UI suites navigate to
+Lifecycle checks themselves and also exercise catalog/API-screen navigation.
+Release builds contain their JavaScript bundle and do not require Metro.
+
+From the generated Android host, run:
+
+```sh
+cd example/android
+./gradlew -PglmapTestBuildType=release -Pandroid.enableMinifyInReleaseBuilds=true \
+  :app:connectedReleaseAndroidTest
+```
+
+On iOS, first build/install the Release app on the selected simulator. Generate
+and run its standalone UI test project from the repository root:
+
+```sh
+xcodegen generate --spec example/tests/ios/project.yml
+xcodebuild -project example/tests/ios/GLMapDemoUITests.xcodeproj \
+  -scheme GLMapDemoUITests \
+  -destination 'platform=iOS Simulator,id=<simulator-uuid>' \
+  -derivedDataPath build/ios-ui-tests CODE_SIGNING_ALLOWED=NO test
+```
+
+The lifecycle-only entry is also available with `EXPO_PUBLIC_GLMAP_LIFECYCLE=1`.
+Benchmarks require `EXPO_PUBLIC_GLMAP_BENCH=1` and a Release build; their private
+native timing control is not a substitute for testing the public map. Set only
+one diagnostic flag at a time. Stop Metro before switching development entry
+modes and rebuild Release bundles after changing flags.
+
+Record the target OS, emulator/simulator or physical-device type, entry mode and
+build configuration. Keep authenticated service checks and fresh-process offline
+restoration separate from bundled-data tests.
+
+## Headless module isolation
+
+Generate isolated Core-only, Search-only and Route-only consumers from the current
+package contents:
+
+```sh
+python3 scripts/create-headless-probes.py --output build/headless-consumers
+```
+
+For each generated app, install dependencies, run `npx expo prebuild`, then build
+and launch it on Android and iOS with its selected plugin. Core must not load any
+feature framework; Search and Route must not load Map. The Search probe includes
+the Montenegro dataset and Route constructs a custom route, so these checks do
+not require an authenticated service request.
+
+Inspect the packaged Android libraries and iOS frameworks as well as the displayed
+result. The iOS assertions are in `tests/headless-ios/`; their apps must be installed
+before the suite runs. Do not treat a combined demo build as proof of headless
+module isolation.
+
+## Recorded results
+
+The verification summary dated **2026-09-24** and the saved
+[evidence](tests/results/README.md) record:
+
+| Check | Recorded outcome |
+| --- | --- |
+| Android Release/R8 API suite | 6/6 checks passed |
+| iOS Release API suite | 6/6 checks passed |
+| Android Core/Search/Route probes | Each displayed a passing result; packaged native libraries were inspected |
+| iOS Core/Search/Route probes | 3/3 XCUITest checks passed; framework lists were inspected |
+| Controlled request identity and location visibility | Passed |
+| Controlled Core downloads | Passed |
+| iOS device archive | Built without signing; not a signed installation or device test |
+| TypeScript, podspec syntax and npm contents | Reported passing |
+
+The combined API and headless results cover different native builds; keep their
+artifact identities separate. These records do not establish physical-device,
+signed-install, complete authenticated service-catalog or reload-UI coverage.
+The earlier summary also records moderate dependency advisory warnings; package
+contents and type checking are not a security audit.
+
+### Public demo and lifecycle validation
+
+The catalog-default app, public lifecycle sample and native-map readiness changes
+were checked on **2026-09-24**. The [run summary](tests/results/demo-cleanup.json)
+records commands, the tested source fingerprint, native revisions and target types.
+
+| Check | Outcome |
+| --- | --- |
+| TypeScript and example entry/cancellation tests | Passed; 9/9 Node tests |
+| Package boundaries and controlled native regressions | Passed |
+| iOS native-child readiness regression | Passed with production Swift methods and host view doubles |
+| Fresh Expo prebuild and CocoaPods integration | Passed with the new application/module identities |
+| Android Release/R8 build and UI suite | 3/3 on an arm64 Android 14 emulator |
+| Android public lifecycle/API checks | 8/8 lifecycle and 6/6 API checks, exercised through the default catalog |
+| iOS Release app and UI suite | 7/7 on an arm64 iPhone 17 / iOS 27.0 simulator |
+| iOS public lifecycle/API checks | 8/8 lifecycle and 6/6 API checks |
+| iOS device Release app | Built without signing; not installed or run on a physical device |
+| Native artifacts and resources | Android build IDs and iOS simulator/device UUIDs and Core resources matched the selected SDK |
+| Package dry-runs, documentation and whitespace | Passed |
+
+The iOS API scenario exposed early `onMapReady` delivery: the outer Expo view
+could have a size before its native map child did, producing non-finite projection
+results. The bridge now lays out the child and checks its attachment/size before
+emitting readiness. `tests/readiness.py` covers this ordering, repeated layout,
+zero size, detach and disposal. Coordinate assertions were not relaxed.
+
+An additional **iPhone Duo / iOS 27.1** simulator run passed the 8 lifecycle and
+6 API scenarios, but only **4/7 UI tests**. Background-state, keyboard Done-button
+accessibility and landscape window-aspect assertions failed. These results are
+not passing coverage for that target. The native input tests assume standard
+single-screen phone geometry and background behavior; additional window/display
+configurations need their own validation.
+
+Native builds used prebuilt `2.2.0-dev.515481f9f` artifacts through an explicit
+local override, with native and Swift revisions matching `native-sdk.json`.
+Dependency pins were unchanged. This is not validation of public Maven/SwiftPM
+release resolution. The Android runner first needed a missing UTP dependency
+outside offline mode and an available emulator; those setup failures did not run
+tests. The first iOS run found the readiness defect above; final standard-target
+results were collected after the fix.
+
+Non-fatal third-party Gradle, Expo/React Native, Swift/header and Hermes warnings
+remain. No signed physical-device, authenticated-service or fresh-process offline
+restoration tests were performed. The benchmark control compiled and its entry
+isolation was checked, but no new performance measurements or standalone headless
+runtime results are claimed.
+
+## Release validation and reporting
+
+For each SDK release, check npm and public native dependency resolution, package
+contents, config-plugin prebuild and native builds from a fresh consumer. Re-run
+API, lifecycle and isolated-module tests against the selected artifacts, including
+optimized Android builds. Test signed physical-device deployment, authenticated
+services and fresh-process offline restoration separately.
+
+Record source revision, artifact identities, command, toolchain, target type,
+configuration, outcome and limitations. Remove API keys and machine-specific paths
+from shared logs. Do not infer successful runtime tests from package publication.

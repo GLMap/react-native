@@ -1,20 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { GLMap, GLMapRef, lab } from "./modules/glmap-test-support/src";
+import { BenchmarkMap, type BenchmarkMapRef } from './modules/glmap-test-support/src/benchmark';
+import { testSupport } from './modules/glmap-test-support';
 import fixture from './assets/stage-a.json';
 
-type BenchRef = GLMapRef & {
-  benchEcho(sequence: number): Promise<number>;
-  benchPayload(values: number[]): Promise<number[]>;
-  benchGeometry(values: number[]): Promise<number[]>;
-  benchPayloadBuffer(values: Float64Array | Uint8Array): Promise<number[]>;
-  benchGeometryBuffer(values: Float64Array | Uint8Array): Promise<number[]>;
-  benchNative(points: number): Promise<number[]>;
-  benchRestyle(alternate: boolean): Promise<number[]>;
-  benchStatus(): Promise<number[]>;
-  benchReadback(): Promise<string>;
-};
+type BenchRef = BenchmarkMapRef;
 type Row = { run: number; path: string; points: number; roundTripMicros: number[];
   nativeHandlerMicros: (number | null)[]; geometryMicros: (number | null)[];
   nativeReadyMicros: number[]; observedReadyMicros: number[] };
@@ -22,11 +13,11 @@ const delay = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, m
 const assert = (ok: boolean, message: string) => { if (!ok) throw Error(message); };
 
 export default function BenchmarkApp() {
-  const ref = useRef<GLMapRef>(null), started = useRef(false);
+  const ref = useRef<BenchmarkMapRef>(null), started = useRef(false);
   const [status, setStatus] = useState('Preparing benchmark');
   return <SafeAreaProvider><SafeAreaView style={{flex: 1}}>
     <Text style={{padding: 12}}>{status}</Text>
-    <View style={{flex: 1}}><GLMap ref={ref} style={{flex: 1}} fixture={JSON.stringify(fixture)}
+    <View style={{flex: 1}}><BenchmarkMap ref={ref} style={{flex: 1}} fixture={JSON.stringify(fixture)}
       onReady={() => {
         if (started.current) return;
         started.current = true;
@@ -42,7 +33,8 @@ async function run(map: BenchRef, status: (value: string) => void) {
     completedUtc: '', passed: false, error: '', platform: Platform.OS, osVersion: Platform.Version,
     mode: __DEV__ ? 'debug' : 'release', expo: '57.0.23', reactNative: '0.86.3',
     hermes: !!(globalThis as any).HermesInternal, fabric: !!(globalThis as any).nativeFabricUIManager,
-    rounds: 5, geometrySamplesPerCell: 15, nativeSdk: 'Release c37ee42cca7929a428fee2a307d20ec319888884',
+    // Record native artifact identities alongside this report using check-artifacts.py.
+    rounds: 5, geometrySamplesPerCell: 15,
     rows, validation, preparation,
   };
   const inputs = new Map<number, number[]>();
@@ -168,7 +160,7 @@ async function run(map: BenchRef, status: (value: string) => void) {
     report.passed = true;
   } catch (error) { report.error = String(error); }
   report.completedUtc = new Date().toISOString();
-  await lab.saveBenchmarkResults(JSON.stringify(report));
+  await testSupport.saveBenchmarkResults(JSON.stringify(report));
   status(report.passed ? 'DONE: React Native transport benchmark' : 'FAILED: ' + report.error);
   console.log('GLMAP_RN_BENCH_DONE', report.passed, report.error);
 }

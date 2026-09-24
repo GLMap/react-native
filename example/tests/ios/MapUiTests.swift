@@ -1,17 +1,34 @@
 import XCTest
 
-final class StageAViewTests: XCTestCase {
-    private let app = XCUIApplication(bundleIdentifier: "software.globus.lab.glmaprn")
+final class MapUiTests: XCTestCase {
+    private let app = XCUIApplication(bundleIdentifier: "software.globus.glmap.reactnative.demo")
 
     override func setUpWithError() throws {
         continueAfterFailure = false
         XCUIDevice.shared.orientation = .portrait
-        app.launchArguments = ["--initialUrl", "http://127.0.0.1:8081"]
         app.launch()
-        if app.buttons["Continue"].waitForExistence(timeout: 2) { app.buttons["Continue"].tap() }
-        if app.buttons["Close"].exists { app.buttons["Close"].tap() }
+        XCTAssertTrue(app.buttons["Lifecycle checks"].waitForExistence(timeout: 30), "Default entry must be the demo catalog")
+        app.buttons["Lifecycle checks"].tap()
         let ready = NSPredicate(format: "label BEGINSWITH 'PASS:'")
-        XCTAssertTrue(app.staticTexts.matching(ready).firstMatch.waitForExistence(timeout: 40))
+        XCTAssertTrue(app.staticTexts.matching(ready).firstMatch.waitForExistence(timeout: 90))
+    }
+
+    func testDefaultCatalogAndPublicApiChecks() throws {
+        app.buttons["Demos"].tap()
+        XCTAssertTrue(app.staticTexts["GLMap · React Native"].waitForExistence(timeout: 10))
+        app.buttons["API checks"].tap()
+        let result = app.staticTexts["api-status"]
+        let completed = expectation(for: NSPredicate(format: "label BEGINSWITH 'PASS:' OR label BEGINSWITH 'FAIL:'"), evaluatedWith: result)
+        wait(for: [completed], timeout: 90)
+        XCTAssertEqual(result.label, "PASS: 6 public SDK API checks")
+        app.buttons["Demos"].tap()
+        XCTAssertTrue(app.staticTexts["GLMap · React Native"].waitForExistence(timeout: 10))
+        let darkTheme = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Dark Theme'")).firstMatch
+        XCTAssertTrue(darkTheme.waitForExistence(timeout: 10))
+        darkTheme.tap()
+        XCTAssertTrue(app.buttons["Back"].waitForExistence(timeout: 10))
+        app.buttons["Back"].tap()
+        XCTAssertTrue(app.buttons["Lifecycle checks"].waitForExistence(timeout: 10))
     }
 
     override func tearDownWithError() throws {
@@ -20,7 +37,7 @@ final class StageAViewTests: XCTestCase {
 
     private func state(_ name: String) throws -> [String: Double] {
         app.buttons["State"].tap()
-        let status = app.staticTexts["lab-status"]
+        let status = app.staticTexts["lifecycle-status"]
         XCTAssertTrue(status.waitForExistence(timeout: 5))
         Thread.sleep(forTimeInterval: 0.3) // Native capture replies asynchronously through JS.
         let value = try JSONDecoder().decode([String: Double].self, from: Data(status.label.utf8))

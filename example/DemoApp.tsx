@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Pressable, SectionList, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { GLMapSdk } from "@globus-software/glmap-core";
@@ -55,11 +55,14 @@ export default function DemoApp() {
   const [editingKey, setEditingKey] = useState(false);
   const [enteredKey, setEnteredKey] = useState("");
   const [failure, setFailure] = useState("");
+  const [diagnostic, setDiagnostic] = useState<'api' | 'lifecycle' | null>(null);
+  const activeKey = useRef(configuredKey);
 
   const initialize = async (apiKey: string) => {
     try {
       await GLMapSdk.initialize(apiKey);
       await GLMapSdk.setTileDownloadingAllowed(true);
+      activeKey.current = apiKey;
       setFailure("");
       setReady(true);
     } catch (error) {
@@ -74,6 +77,17 @@ export default function DemoApp() {
     setEditingKey(false);
   };
 
+  if (diagnostic) {
+    const Diagnostic = (diagnostic === 'api'
+      ? require('./DemoApiChecks').default
+      : require('./LifecycleApp').default) as React.ComponentType<{ apiKey?: string; onBack?: () => void }>;
+    return <Diagnostic apiKey={activeKey.current} onBack={() => {
+      setReady(false);
+      setDiagnostic(null);
+      void initialize(activeKey.current);
+    }} />;
+  }
+
   const Screen = demo?.screen;
   return (
     <SafeAreaProvider>
@@ -85,6 +99,10 @@ export default function DemoApp() {
           <View style={styles.key}>
             <Text style={styles.keySource}>API key: {keySource}</Text>
             <Action title="API key" onPress={() => setEditingKey(!editingKey)} />
+          </View>
+          <View style={styles.key}>
+            <Action title="Lifecycle checks" disabled={!ready} onPress={() => setDiagnostic('lifecycle')} />
+            <Action title="API checks" disabled={!ready} onPress={() => setDiagnostic('api')} />
           </View>
           {editingKey && (
             <View style={styles.key}>

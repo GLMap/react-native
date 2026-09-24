@@ -1,4 +1,4 @@
-package software.globus.lab.glmaprn
+package software.globus.glmap.reactnative.demo
 
 import android.content.Intent
 import android.graphics.Point
@@ -18,7 +18,7 @@ import java.util.regex.Pattern
 import kotlin.math.abs
 
 @RunWith(AndroidJUnit4::class)
-class StageAViewTest {
+class MapUiTest {
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
     private val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
     private val output = "/sdcard/Download/glmap-rn-ui"
@@ -27,15 +27,17 @@ class StageAViewTest {
         val intent = requireNotNull(context.packageManager.getLaunchIntentForPackage(context.packageName))
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
         context.startActivity(intent)
-        // First-launch Expo onboarding is UI, not a GLMap failure.
         device.waitForIdle()
-        device.findObject(By.text("Continue"))?.click()
-        device.waitForIdle()
-        device.findObject(By.desc("Close"))?.click()
-        checkNotNull(device.wait(Until.findObject(By.desc("GLMap canvas")), 30000))
-        // A preceding test may have left the camera snapshot in the status field.
-        checkNotNull(device.wait(Until.findObject(By.res("lab-status")
-            .desc(Pattern.compile("PASS:.*|\\{.*"))), 30000))
+        // A running lifecycle screen can survive a background/resume test.
+        if (!device.hasObject(By.res("lifecycle-status"))) {
+            checkNotNull(device.wait(Until.findObject(By.text("GLMap · React Native")), 30000))
+            button("Lifecycle checks").click()
+        }
+        checkNotNull(device.wait(Until.findObject(By.res("lifecycle-status")
+            .desc(Pattern.compile("PASS:.*|\\{.*"))), 90000))
+        checkNotNull(device.wait(Until.findObject(By.desc("GLMap canvas")), 10000))
+        button("Reset").click()
+        SystemClock.sleep(300)
     }
 
     private fun button(title: String): UiObject2 = checkNotNull(device.wait(
@@ -46,7 +48,7 @@ class StageAViewTest {
         device.waitForIdle()
         // Camera capture completes asynchronously on the render thread, then JS.
         SystemClock.sleep(250)
-        val raw = checkNotNull(device.wait(Until.findObject(By.res("lab-status")), 5000)).contentDescription
+        val raw = checkNotNull(device.wait(Until.findObject(By.res("lifecycle-status")), 5000)).contentDescription
         val result = JSONObject(raw)
         log(label, result)
         return result
@@ -85,6 +87,22 @@ class StageAViewTest {
         SystemClock.sleep(500)
         val after = state("$label-after")
         assertTrue("Pan must change center", abs(before.getDouble("longitude") - after.getDouble("longitude")) > 0.01)
+    }
+
+    @Test
+    fun defaultCatalogAndPublicApiChecks() {
+        launch()
+        button("Demos").click()
+        checkNotNull(device.wait(Until.findObject(By.text("GLMap · React Native")), 10000))
+        button("API checks").click()
+        val result = checkNotNull(device.wait(Until.findObject(By.res("api-status")
+            .desc(Pattern.compile("PASS:.*|FAIL:.*"))), 90000))
+        assertEquals("PASS: 6 public SDK API checks", result.contentDescription)
+        button("Demos").click()
+        checkNotNull(device.wait(Until.findObject(By.text("GLMap · React Native")), 10000))
+        button("Dark Theme").click()
+        checkNotNull(device.wait(Until.findObject(By.desc("Back")), 10000)).click()
+        checkNotNull(device.wait(Until.findObject(By.text("GLMap · React Native")), 10000))
     }
 
     @Test

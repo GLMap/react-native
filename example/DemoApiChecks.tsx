@@ -1,10 +1,10 @@
 import { GLSearch } from "@globus-software/glsearch";
 import { GLRouteSDK } from "@globus-software/glroute";
-import React, { useRef, useState } from "react";
-import { Platform, Text, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Button, Platform, Text, View } from "react-native";
 import { errorCode, GLMapSdk } from "@globus-software/glmap-core";
 import { GLMapView, GLMapViewRef } from "@globus-software/glmap";
-import { lab } from "./modules/glmap-test-support/src";
+import { testSupport } from "./modules/glmap-test-support";
 
 function check(value: unknown, message: string): asserts value {
   if (!value) throw new Error(message);
@@ -15,11 +15,26 @@ async function rejects(body: () => Promise<unknown>, code: string) {
 }
 
 /** On-device checks of the public demo API; build with EXPO_PUBLIC_GLMAP_API_TESTS=1. */
-export default function DemoApiChecks() {
+export default function DemoApiChecks({ apiKey = '', onBack }: { apiKey?: string; onBack?: () => void } = {}) {
   const map = useRef<GLMapViewRef>(null);
   const started = useRef(false);
+  const active = useRef(true);
+  const [initialized, setInitialized] = useState(false);
   const [visible, setVisible] = useState(true);
-  const [status, setStatus] = useState("Running demo API checks…");
+  const [finished, setFinished] = useState(false);
+  const [status, setStatus] = useState("Initializing Core…");
+  useEffect(() => {
+    active.current = true;
+    void (async () => {
+      try {
+        await GLMapSdk.initialize(apiKey);
+        if (!active.current) return;
+        await GLMapSdk.setTileDownloadingAllowed(false);
+        if (active.current) setInitialized(true);
+      } catch (error) { if (active.current) { setStatus(`FAIL: ${String(error)}`); setFinished(true); } }
+    })();
+    return () => { active.current = false; };
+  }, [apiKey]);
   const run = async () => {
     if (started.current || !map.current) return;
     started.current = true;
@@ -30,9 +45,8 @@ export default function DemoApiChecks() {
       catch (error) { tests.push({ name, passed: false, error: String(error) }); throw error; }
     };
     const center = { latitude: 42.4341, longitude: 19.26 };
+    let failure: string | undefined;
     try {
-      await GLMapSdk.initialize("");
-      await GLMapSdk.setTileDownloadingAllowed(false);
       await test("Degrees and partial camera update preserve other fields", async () => {
         await view.moveCamera({ center, zoom: 14, angle: 90, pitch: 20 }, null);
         const before = await view.captureState();
@@ -44,13 +58,15 @@ export default function DemoApiChecks() {
         await rejects(() => view.moveCamera({ angle: 1e300 }, null), "invalid_argument");
         await rejects(() => view.moveCamera({ pitch: 100 }, null), "invalid_argument");
         await view.moveCamera({ angle: 0, pitch: 0 }, null);
+        // Projection comparisons require the reset camera to reach a rendered frame.
+        await view.captureState();
       });
       const input = new Float64Array([NaN, 19.25, 42.43, 19.27, 42.44, NaN]);
       const line = input.subarray(1, 5);
       await test("Packed projection, subview bounds and convenience arrays", async () => {
         const a = await view.project(line), b = await view.project(Array.from(line));
         await rejects(() => view.project(new Float64Array([19, 91])), "invalid_argument");
-        check(a.length === 4 && a.every((v, i) => Number.isFinite(v) && Math.abs(v - b[i]) < 0.001), "Projection/subview mismatch");
+        check(a.length === 4 && a.every((v, i) => Number.isFinite(v) && Math.abs(v - b[i]) < 0.001), `Projection/subview mismatch: ${JSON.stringify({ a, b })}`);
       });
       await test("Packed lines, polygon rings, markers and group pins", async () => {
         const layer = await view.addVectorLayer({ source: { line }, style: "line{width:4pt;color:red;}", drawOrder: 2 });
@@ -74,16 +90,19 @@ export default function DemoApiChecks() {
         const image = await view.addImage({ ...center, image: { svg: "pin.svg", scale: 1 }, anchor: "bottom", drawOrder: 3 });
         await image.update({ scale: 1.2 });
         const route = await GLRouteSDK.buildRoute([{ coordinates: new Float64Array([19.25,42.43,19.26,42.4341]), instruction: "Continue", turn: "continue", duration: 30 }, { coordinates: [19.26,42.4341,19.27,42.44], instruction: "Turn", turn: "right", duration: 20 }]);
-        check(route.distance > 100, "Packed route input");
-        const track = await view.addTrack({ style: "{width:5pt;color:red;}", drawOrder: 2 });
-        await track.setRoute(route, "#FF0000");
-        await track.setProgress(0.5);
-        await track.appendPoint(center, "#FF0000");
-        await track.remove(); await track.remove();
-        await rejects(() => track.setProgress(1), "not_found");
-        await image.remove();
-        await rejects(() => image.update({ scale: 2 }), "not_found");
-        await route.release();
+        try {
+          check(route.distance > 100, "Packed route input");
+          const track = await view.addTrack({ style: "{width:5pt;color:red;}", drawOrder: 2 });
+          try {
+            await track.setRoute(route, "#FF0000");
+            await track.setProgress(0.5);
+            await track.appendPoint(center, "#FF0000");
+          } finally { await track.remove(); }
+          await track.remove();
+          await rejects(() => track.setProgress(1), "not_found");
+          await image.remove();
+          await rejects(() => image.update({ scale: 2 }), "not_found");
+        } finally { await route.release(); }
       });
       await test("Independent Search queries and Map query capability", async () => {
         await GLMapSdk.addDataSet("Montenegro.vm", "map");
@@ -102,9 +121,18 @@ export default function DemoApiChecks() {
         await rejects(() => view.captureState(), "disposed");
         await rejects(() => GLSearch.pickMapObject(view,0,0,24), "disposed");
       });
-      setStatus(`PASS: ${tests.length} demo API checks`);
-    } catch (error) { setStatus(`FAIL: ${String(error)}`); }
-    await lab.saveResults(JSON.stringify({ experiment: "demo-api-polish", platform: Platform.OS, date: new Date().toISOString(), passed: tests.length === 6 && tests.every((t) => t.passed), tests }));
+    } catch (error) { failure = String(error); }
+    if (!active.current) return;
+    const passed = !failure && tests.length === 6 && tests.every(test => test.passed);
+    try {
+      await testSupport.saveResults(JSON.stringify({ suite: "public-sdk-api", platform: Platform.OS, date: new Date().toISOString(), passed, error: failure, tests }));
+      if (active.current) setStatus(passed ? `PASS: ${tests.length} public SDK API checks` : `FAIL: ${failure ?? 'Incomplete suite'}`);
+    } catch (error) { if (active.current) setStatus(`FAIL: cannot save results: ${String(error)}`); }
+    finally { if (active.current) setFinished(true); }
   };
-  return <View style={{ flex: 1, paddingTop: 60 }}><Text>{status}</Text>{visible && <GLMapView ref={map} style={{ flex: 1 }} onMapReady={() => void run()} />}</View>;
+  return <View style={{ flex: 1, paddingTop: 60 }}>
+    <Text testID="api-status" accessibilityLabel={status}>{status}</Text>
+    {onBack && <Button title="Demos" disabled={!finished} onPress={onBack} />}
+    {initialized && visible && <GLMapView ref={map} style={{ flex: 1 }} onMapReady={() => void run()} />}
+  </View>;
 }

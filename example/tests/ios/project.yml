@@ -1,25 +1,25 @@
-name: GLMapLabUITests
+name: GLMapDemoUITests
 options:
   deploymentTarget:
-    iOS: "15.1"
+    iOS: "16.4"
 targets:
-  GLMapLabUITests:
+  GLMapDemoUITests:
     type: bundle.ui-testing
     platform: iOS
     sources:
-      - StageAViewTests.swift
+      - MapUiTests.swift
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: software.globus.lab.glmaprn.uitests
+        PRODUCT_BUNDLE_IDENTIFIER: software.globus.glmap.reactnative.demo.uitests
         GENERATE_INFOPLIST_FILE: YES
         SWIFT_VERSION: "5.0"
         CODE_SIGNING_ALLOWED: NO
 schemes:
-  GLMapLabUITests:
+  GLMapDemoUITests:
     build:
       targets:
-        GLMapLabUITests: [test]
+        GLMapDemoUITests: [test]
     test:
       targets:
-        - GLMapLabUITests
+        - GLMapDemoUITests
       gatherCoverageData: false

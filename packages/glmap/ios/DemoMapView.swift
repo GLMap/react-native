@@ -91,11 +91,18 @@ final class GLMapDemoView: ExpoView {
     override func layoutSubviews() {
         super.layoutSubviews()
         map.frame = bounds
+        map.layoutIfNeeded()
         reportReady()
     }
-    override func didMoveToWindow() { super.didMoveToWindow(); reportReady() }
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        // Fabric may attach an already-sized wrapper before laying out its child.
+        // Readiness belongs to the native map, not only to the outer Expo view.
+        setNeedsLayout()
+    }
     private func reportReady() {
-        if !disposed && !readySent && window != nil && bounds.width > 0 && bounds.height > 0 {
+        if !disposed && !readySent && window != nil && map.window != nil
+            && map.bounds.width > 0 && map.bounds.height > 0 {
             readySent = true
             onMapReady([:])
         }

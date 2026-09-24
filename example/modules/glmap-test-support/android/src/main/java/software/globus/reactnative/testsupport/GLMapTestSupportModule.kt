@@ -1,4 +1,4 @@
-package software.globus.lab.reactnative
+package software.globus.reactnative.testsupport
 
 import expo.modules.kotlin.jni.NativeArrayBuffer
 
@@ -27,9 +27,9 @@ class CameraRecord : Record {
     @Field var pitch: Double = 0.0
 }
 
-class GLMapLabModule : Module() {
+class GLMapTestSupportModule : Module() {
     override fun definition() = ModuleDefinition {
-        Name("GLMapLab")
+        Name("GLMapTestSupport")
         AsyncFunction("saveBenchmarkResults") { json: String ->
             val context = requireNotNull(appContext.reactContext)
             val file = java.io.File(context.getExternalFilesDir(null), "react-native-benchmark.json")
@@ -42,32 +42,38 @@ class GLMapLabModule : Module() {
             file.writeText(json)
             file.absolutePath
         }
-        View(GLMapLabView::class) {
+        AsyncFunction("saveLifecycleResults") { json: String ->
+            val context = requireNotNull(appContext.reactContext)
+            val file = java.io.File(context.getExternalFilesDir(null), "react-native-lifecycle.json")
+            file.writeText(json)
+            file.absolutePath
+        }
+        View(GLMapTestSupportView::class) {
             Events("onReady", "onMapTap", "onFailure")
-            Prop("fixture") { view: GLMapLabView, value: String -> view.configure(value) }
-            AsyncFunction("captureState") { view: GLMapLabView, promise: Promise -> view.capture(promise) }
-            AsyncFunction("setCamera") { view: GLMapLabView, value: CameraRecord -> view.camera(value) }
-            AsyncFunction("createVectorLayer") { view: GLMapLabView, order: Int, promise: Promise -> view.createLayer(order, promise) }
-            AsyncFunction("mutateVectorLayer") { view: GLMapLabView, id: Int, operation: String, coordinates: DoubleArray?, json: String?, style: String?, promise: Promise ->
+            Prop("fixture") { view: GLMapTestSupportView, value: String -> view.configure(value) }
+            AsyncFunction("captureState") { view: GLMapTestSupportView, promise: Promise -> view.capture(promise) }
+            AsyncFunction("setCamera") { view: GLMapTestSupportView, value: CameraRecord -> view.camera(value) }
+            AsyncFunction("createVectorLayer") { view: GLMapTestSupportView, order: Int, promise: Promise -> view.createLayer(order, promise) }
+            AsyncFunction("mutateVectorLayer") { view: GLMapTestSupportView, id: Int, operation: String, coordinates: DoubleArray?, json: String?, style: String?, promise: Promise ->
                 view.mutate(id, operation, coordinates, json, style, promise)
             }
-            AsyncFunction("diagnostics") { view: GLMapLabView -> view.diagnostics() }
-            AsyncFunction("benchEcho") { view: GLMapLabView, sequence: Int -> view.bench().echo(sequence) }
-            AsyncFunction("benchPayload") { view: GLMapLabView, values: DoubleArray -> view.bench().payload(values) }
-            AsyncFunction("benchGeometry") { view: GLMapLabView, values: DoubleArray -> view.bench().geometry(values) }
-            AsyncFunction("benchPayloadBuffer") { view: GLMapLabView, values: NativeArrayBuffer -> view.bench().payloadBuffer(values) }
-            AsyncFunction("benchGeometryBuffer") { view: GLMapLabView, values: NativeArrayBuffer -> view.bench().geometryBuffer(values) }
-            AsyncFunction("benchNative") { view: GLMapLabView, count: Int -> view.bench().native(count) }
-            AsyncFunction("benchRestyle") { view: GLMapLabView, alternate: Boolean -> view.bench().restyle(alternate) }
-            AsyncFunction("benchStatus") { view: GLMapLabView -> view.bench().status() }
-            AsyncFunction("benchReadback") { view: GLMapLabView -> view.bench().readback() }
-            AsyncFunction("dispose") { view: GLMapLabView -> view.dispose() }
-            OnViewDestroys { view: GLMapLabView -> view.dispose() }
+            AsyncFunction("diagnostics") { view: GLMapTestSupportView -> view.diagnostics() }
+            AsyncFunction("benchEcho") { view: GLMapTestSupportView, sequence: Int -> view.bench().echo(sequence) }
+            AsyncFunction("benchPayload") { view: GLMapTestSupportView, values: DoubleArray -> view.bench().payload(values) }
+            AsyncFunction("benchGeometry") { view: GLMapTestSupportView, values: DoubleArray -> view.bench().geometry(values) }
+            AsyncFunction("benchPayloadBuffer") { view: GLMapTestSupportView, values: NativeArrayBuffer -> view.bench().payloadBuffer(values) }
+            AsyncFunction("benchGeometryBuffer") { view: GLMapTestSupportView, values: NativeArrayBuffer -> view.bench().geometryBuffer(values) }
+            AsyncFunction("benchNative") { view: GLMapTestSupportView, count: Int -> view.bench().native(count) }
+            AsyncFunction("benchRestyle") { view: GLMapTestSupportView, alternate: Boolean -> view.bench().restyle(alternate) }
+            AsyncFunction("benchStatus") { view: GLMapTestSupportView -> view.bench().status() }
+            AsyncFunction("benchReadback") { view: GLMapTestSupportView -> view.bench().readback() }
+            AsyncFunction("dispose") { view: GLMapTestSupportView -> view.dispose() }
+            OnViewDestroys { view: GLMapTestSupportView -> view.dispose() }
         }
     }
 }
 
-class GLMapLabView(context: Context, appContext: AppContext) : ExpoView(context, appContext) {
+class GLMapTestSupportView(context: Context, appContext: AppContext) : ExpoView(context, appContext) {
     private val main = Handler(Looper.getMainLooper())
     private val onReady by EventDispatcher()
     private val onMapTap by EventDispatcher()
@@ -87,15 +93,15 @@ class GLMapLabView(context: Context, appContext: AppContext) : ExpoView(context,
         fun close() { objects?.close(); objects = null; native.close() }
     }
     private val layers = mutableMapOf<Int, Layer>()
-    private var benchmark: LabBenchmark? = null
-    fun bench(): LabBenchmark {
+    private var benchmark: MapBenchmark? = null
+    fun bench(): MapBenchmark {
         checkOpen()
-        return benchmark ?: LabBenchmark(map).also { benchmark = it }
+        return benchmark ?: MapBenchmark(map).also { benchmark = it }
     }
 
     init {
         map.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-        map.contentDescription = "GLMap canvas"
+        map.contentDescription = "Benchmark map"
         addView(map)
         val detector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
             override fun onDown(e: MotionEvent) = true

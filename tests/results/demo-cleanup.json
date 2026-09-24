@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "suite": "public-sdk-demo-cleanup",
+  "date": "2026-09-24",
+  "baseRevision": "45ecb925cdf1ce5dcc8680bfdf62798974bb19c2",
+  "sourceState": "Working tree with catalog default, public lifecycle sample, renamed diagnostics and iOS native-map readiness fix",
+  "testedSourceFingerprint": {
+    "algorithm": "SHA-256 of sorted source/configuration paths, NUL, and each file's binary SHA-256; excludes Markdown and tests/results",
+    "sha256": "8a1a5f60bfceba49c97f9070649a0560544079dc4a3a42db7496e3ec87c97e84",
+    "files": 119,
+    "extensions": [".ts", ".tsx", ".js", ".cjs", ".mjs", ".kt", ".swift", ".gradle", ".podspec", ".xml", ".yml", ".json", ".py"]
+  },
+  "native": {
+    "version": "2.2.0-dev.515481f9f",
+    "sourceRevision": "515481f9f8e84711ccbc19e2395605959ad81540",
+    "swiftPackageRevision": "04f1a99d51045456896eb7cca3fb15fb5b570866",
+    "resolution": "Explicit local prebuilt SDK override matching native-sdk.json",
+    "publicReleaseResolutionValidated": false
+  },
+  "toolchain": {
+    "reactNative": "0.86.3",
+    "expo": "57.0.23",
+    "react": "19.2.3",
+    "gradle": "9.3.1",
+    "java": "17.0.14",
+    "xcode": "27.0 (27A266a)"
+  },
+  "hostChecks": {
+    "typeScript": "PASS",
+    "exampleEntryAndAsyncCleanup": {"passed": 9, "failed": 0},
+    "nativeModuleBoundaries": "PASS: four modules",
+    "controlledRequestIdentityLocationAndDownloads": "PASS",
+    "iosInnerMapReadinessRegression": "PASS: production Swift methods with host view doubles",
+    "expoPrebuild": "PASS: fresh generated Android/iOS hosts",
+    "cocoaPodsInstall": "PASS",
+    "npmPackageContents": "PASS: four package dry-runs",
+    "documentationLinksAndSyntax": "PASS"
+  },
+  "android": {
+    "targetType": "arm64 emulator",
+    "os": "Android 14",
+    "configuration": "Release/R8 with bundled default-catalog JavaScript",
+    "publicLifecycle": {"passed": 8, "failed": 0},
+    "publicApi": {"passed": 6, "failed": 0},
+    "ui": {"passed": 3, "failed": 0},
+    "command": "./gradlew --no-daemon -PreactNativeArchitectures=arm64-v8a -Pandroid.enableMinifyInReleaseBuilds=true -PglmapTestBuildType=release :app:connectedReleaseAndroidTest"
+  },
+  "ios": {
+    "targetType": "arm64 iPhone 17 simulator",
+    "os": "iOS 27.0",
+    "configuration": "Release app, Debug XCUITest runner",
+    "publicLifecycle": {"passed": 8, "failed": 0},
+    "publicApi": {"passed": 6, "failed": 0},
+    "ui": {"passed": 7, "failed": 0},
+    "command": "xcodebuild -project example/tests/ios/GLMapDemoUITests.xcodeproj -scheme GLMapDemoUITests -configuration Debug -destination 'platform=iOS Simulator,id=<target>' -derivedDataPath build/demo-cleanup/ios-ui -parallel-testing-enabled NO -collect-test-diagnostics never CODE_SIGNING_ALLOWED=NO test",
+    "unsignedDeviceReleaseBuild": "PASS: build only, no physical-device installation or execution"
+  },
+  "additionalSimulator": {
+    "targetType": "arm64 iPhone Duo simulator",
+    "os": "iOS 27.1",
+    "publicLifecycle": {"passed": 8, "failed": 0},
+    "publicApi": {"passed": 6, "failed": 0},
+    "ui": {"passed": 4, "failed": 3},
+    "failedScenarios": [
+      "Background-state assertion after Home",
+      "Accessibility tap on keyboard Done",
+      "Landscape window-aspect assertion"
+    ],
+    "note": "These outcomes are not counted as passing UI coverage for this target. The input suite assumes standard single-screen phone geometry and background behavior."
+  },
+  "artifactChecks": {
+    "androidNativeBuildIdsAndCoreResources": "PASS",
+    "iosSimulatorNativeUuidsAndCoreResources": "PASS",
+    "iosDeviceNativeUuidsAndCoreResources": "PASS"
+  },
+  "regressionFixed": "iOS readiness could be emitted for a sized Expo wrapper before its native map child was laid out, producing non-finite early projections. Readiness now follows native child layout and attachment.",
+  "limitations": [
+    "No signed physical-device run",
+    "No authenticated service or offline-restoration certification",
+    "No new benchmark timing or standalone headless runtime run",
+    "Public release dependency resolution and older OS coverage were not established",
+    "Three UI checks failed on the additional iPhone Duo / iOS 27.1 target"
+  ]
+}

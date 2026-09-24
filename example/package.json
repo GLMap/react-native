@@ -22,7 +22,6 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web",
     "demo": "node scripts/demo-env.mjs expo start --dev-client --localhost",
     "typecheck": "tsc --noEmit"
   },

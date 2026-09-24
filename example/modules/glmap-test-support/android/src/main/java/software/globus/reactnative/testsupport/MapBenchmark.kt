@@ -1,4 +1,4 @@
-package software.globus.lab.reactnative
+package software.globus.reactnative.testsupport
 
 import android.os.Handler
 import android.os.Looper
@@ -7,8 +7,8 @@ import expo.modules.kotlin.jni.NativeArrayBuffer
 import java.nio.ByteOrder
 import kotlin.math.sin
 
-/** Lab-only timings, using public SDK input and explicit Ready outcomes. */
-class LabBenchmark(private val map: GLMapTextureView) {
+/** Benchmark-only timings, using public SDK input and explicit Ready outcomes. */
+class MapBenchmark(private val map: GLMapTextureView) {
     private val main = Handler(Looper.getMainLooper())
     private val layer = GLMapVectorLayer(3)
     private val styles = arrayOf("#E74C3C", "#2650D6").map {
