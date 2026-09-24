@@ -1,6 +1,9 @@
+import { GLSearch } from "@globus-software/glsearch";
+import { GLRouteSDK } from "@globus-software/glroute";
 import React, { useRef, useState } from "react";
 import { Platform, Text, View } from "react-native";
-import { errorCode, GLMapSdk, GLMapView, GLMapViewRef } from "glmap-rn/demo";
+import { errorCode, GLMapSdk } from "@globus-software/glmap-core";
+import { GLMapView, GLMapViewRef } from "@globus-software/glmap";
 import { lab } from "./modules/glmap-test-support/src";
 
 function check(value: unknown, message: string): asserts value {
@@ -70,7 +73,7 @@ export default function DemoApiChecks() {
       await test("Image/track handles, packed route steps and removed handles", async () => {
         const image = await view.addImage({ ...center, image: { svg: "pin.svg", scale: 1 }, anchor: "bottom", drawOrder: 3 });
         await image.update({ scale: 1.2 });
-        const route = await GLMapSdk.buildRoute([{ coordinates: new Float64Array([19.25,42.43,19.26,42.4341]), instruction: "Continue", turn: "continue", duration: 30 }, { coordinates: [19.26,42.4341,19.27,42.44], instruction: "Turn", turn: "right", duration: 20 }]);
+        const route = await GLRouteSDK.buildRoute([{ coordinates: new Float64Array([19.25,42.43,19.26,42.4341]), instruction: "Continue", turn: "continue", duration: 30 }, { coordinates: [19.26,42.4341,19.27,42.44], instruction: "Turn", turn: "right", duration: 20 }]);
         check(route.distance > 100, "Packed route input");
         const track = await view.addTrack({ style: "{width:5pt;color:red;}", drawOrder: 2 });
         await track.setRoute(route, "#FF0000");
@@ -82,6 +85,14 @@ export default function DemoApiChecks() {
         await rejects(() => image.update({ scale: 2 }), "not_found");
         await route.release();
       });
+      await test("Independent Search queries and Map query capability", async () => {
+        await GLMapSdk.addDataSet("Montenegro.vm", "map");
+        const found = await GLSearch.search({text:"Podgorica",type:"search",offline:true,center,limit:30});
+        check(found.length > 0, "Offline Search returned no data");
+        const point = await view.project(new Float64Array([center.longitude,center.latitude]));
+        const picked = await GLSearch.pickMapObject(view,point[0],point[1],24);
+        check(picked === null || typeof picked.name === "string", "Search did not consume Map's Core state");
+      });
       await test("Unmount invalidates retained handles", async () => {
         const image = await view.addImage({ ...center, image: { svg: "pin.svg", scale: 1 }, anchor: "bottom", drawOrder: 3 });
         setVisible(false);
@@ -89,10 +100,11 @@ export default function DemoApiChecks() {
         check(map.current === null, "Map did not unmount");
         await rejects(() => image.update({ scale: 2 }), "disposed");
         await rejects(() => view.captureState(), "disposed");
+        await rejects(() => GLSearch.pickMapObject(view,0,0,24), "disposed");
       });
       setStatus(`PASS: ${tests.length} demo API checks`);
     } catch (error) { setStatus(`FAIL: ${String(error)}`); }
-    await lab.saveResults(JSON.stringify({ experiment: "demo-api-polish", platform: Platform.OS, date: new Date().toISOString(), passed: tests.length === 5 && tests.every((t) => t.passed), tests }));
+    await lab.saveResults(JSON.stringify({ experiment: "demo-api-polish", platform: Platform.OS, date: new Date().toISOString(), passed: tests.length === 6 && tests.every((t) => t.passed), tests }));
   };
   return <View style={{ flex: 1, paddingTop: 60 }}><Text>{status}</Text>{visible && <GLMapView ref={map} style={{ flex: 1 }} onMapReady={() => void run()} />}</View>;
 }

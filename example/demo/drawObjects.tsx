@@ -1,14 +1,8 @@
+import { GLRouteSDK } from "@globus-software/glroute";
 import React, { useEffect, useRef, useState } from "react";
-import {
-  GeoPoint,
-  GLMapSdk,
-  GLMapViewRef,
-  GLMapImage,
-  GLMapTrack,
-  GLRoute,
-  Location,
-  MapTouch,
-} from "glmap-rn/demo";
+import { GeoPoint, GLMapSdk, Location } from "@globus-software/glmap-core";
+import { GLMapViewRef, GLMapImage, GLMapTrack, MapTouch } from "@globus-software/glmap";
+import { GLRoute } from "@globus-software/glroute";
 import { Action, Controls, DemoMap, DemoProps, Screen, Status, useTasks } from "./common";
 import { useLocationFeed } from "./location";
 
@@ -239,7 +233,7 @@ export function TrackArrowsDemo({ onBack }: DemoProps) {
     const { signal } = request.current;
     let built: GLRoute;
     try {
-      built = await GLMapSdk.route(
+      built = await GLRouteSDK.route(
         {
           points: [
             { latitude: 40.633, longitude: 14.502 },

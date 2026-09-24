@@ -21,9 +21,9 @@ def run_kotlin(source):
     subprocess.run(['java','-cp',os.pathsep.join([compiler,*deps,*runtime]),'org.jetbrains.kotlin.cli.jvm.K2JVMCompiler','-no-stdlib','-no-reflect','-classpath',os.pathsep.join(runtime),'-d',str(OUT/'checks.jar'),str(path)],check=True)
     subprocess.run(['java','-cp',os.pathsep.join([str(OUT/'checks.jar'),*runtime]),'ChecksKt'],check=True)
 
-def main():
-    android=(ROOT/'android/src/main/java/software/globus/lab/reactnative/DemoSdk.kt').read_text()
-    methods=next(line for line in android.splitlines() if 'private class Request(' in line) + '\n' + android[android.index('    private fun begin('):android.index('    fun search(')]
+def main(module, owner, api):
+    android=(ROOT/f'packages/{module}/android/src/main/java/software/globus/reactnative/{api}/{owner}.kt').read_text()
+    methods=next(line for line in android.splitlines() if 'private class Request(' in line) + '\n' + declaration(android,'private fun begin(')+'\n'+android[android.index('    private fun finish('):android.index('    fun cancelRequest(')]+'\n'+declaration(android,'fun cancelRequest(')
     source='''class DemoFailure(val code: String) {
  companion object { fun invalid(s: String)=DemoFailure("invalid");fun cancelled()=DemoFailure("cancelled") }
 }
@@ -51,9 +51,9 @@ fun main() {
 }
 '''
     run_kotlin(source)
-    ios=(ROOT/'ios/DemoSdk.swift').read_text()
+    ios=(ROOT/f'packages/{module}/ios/{owner}.swift').read_text()
     methods='\n'.join(declaration(ios,m) for m in ('private final class Request', 'private func begin(', 'private func finish(', 'func cancelRequest('))
-    view=(ROOT/'ios/DemoMapView.swift').read_text()
+    view=(ROOT/'packages/glmap/ios/DemoMapView.swift').read_text()
     visibility=declaration(view,'private func updateLocationVisibility(')
     source='''import Foundation
 struct DemoFailure: Error { let code:String; static let cancelled=Self(code:"cancelled");static func invalid(_ s:String)->Self {Self(code:"invalid")} }
@@ -103,4 +103,7 @@ print("PASS iOS user-location visibility: no-fix, hide, late fix and unhide bear
     path=OUT/'Checks.swift';path.write_text(source)
     subprocess.run(['swiftc','-swift-version','5',str(path),'-o',str(OUT/'checks-swift')],check=True)
     subprocess.run([str(OUT/'checks-swift')],check=True)
-if __name__=='__main__':main()
+if __name__=='__main__':
+    for module,owner,api in [('glmap-core','CoreSdk','core'),('glsearch','SearchSdk','glsearch'),('glroute','RouteSdk','glroute')]:
+        print('Checking',module,flush=True)
+        main(module,owner,api)

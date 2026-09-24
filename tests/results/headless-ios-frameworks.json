@@ -1,0 +1,13 @@
+{
+  "core": [
+    "GLMapCore.framework"
+  ],
+  "search": [
+    "GLMapCore.framework",
+    "GLSearch.framework"
+  ],
+  "route": [
+    "GLMapCore.framework",
+    "GLRoute.framework"
+  ]
+}

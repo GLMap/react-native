@@ -1,0 +1,5 @@
+Copyright (c) 2026 Globus. All rights reserved.
+
+No new redistribution license is granted by this source extraction. GLMap SDK
+binaries and data retain their vendor terms. Third-party and template notices in
+the example projects remain applicable. Confirm publication terms before release.

@@ -1,0 +1,22 @@
+{
+  "core": {
+    "passed": true,
+    "nativeLibraries": [
+      "lib/arm64-v8a/libglmapcore.so"
+    ]
+  },
+  "search": {
+    "passed": true,
+    "nativeLibraries": [
+      "lib/arm64-v8a/libglmapcore.so",
+      "lib/arm64-v8a/libglsearch.so"
+    ]
+  },
+  "route": {
+    "passed": true,
+    "nativeLibraries": [
+      "lib/arm64-v8a/libglmapcore.so",
+      "lib/arm64-v8a/libglroute.so"
+    ]
+  }
+}

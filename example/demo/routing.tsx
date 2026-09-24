@@ -1,17 +1,9 @@
+import { GLRouteSDK } from "@globus-software/glroute";
 import React, { useEffect, useRef, useState } from "react";
 import { Alert, StyleSheet, Text, View } from "react-native";
-import {
-  GeoPoint,
-  GLMapSdk,
-  GLMapViewRef,
-  GLMapImage,
-  GLMapTrack,
-  GLRoute,
-  Location,
-  MapTouch,
-  NavigationState,
-  RouteMode,
-} from "glmap-rn/demo";
+import { GeoPoint, GLMapSdk, Location } from "@globus-software/glmap-core";
+import { GLMapViewRef, GLMapImage, GLMapTrack, MapTouch } from "@globus-software/glmap";
+import { GLRoute, NavigationState, RouteMode } from "@globus-software/glroute";
 import {
   Action,
   Controls,
@@ -71,7 +63,7 @@ export function RouteBuildingDemo({ onBack }: DemoProps) {
         1,
       ]);
       setStatus(`Requesting ${offline ? "offline" : "online"} route…`);
-      const next = await GLMapSdk.route({ points: [departure, destination], mode, offline }, signal);
+      const next = await GLRouteSDK.route({ points: [departure, destination], mode, offline }, signal);
       if (signal.aborted) return void next.release();
       const previous = route.current;
       route.current = next;
@@ -248,7 +240,7 @@ export function TurnByTurnDemo({ onBack }: DemoProps) {
       setTitle("Building route...");
       let next: GLRoute;
       try {
-        next = await GLMapSdk.route(
+        next = await GLRouteSDK.route(
           {
             points: [
               { latitude: from.latitude, longitude: from.longitude },
@@ -273,7 +265,7 @@ export function TurnByTurnDemo({ onBack }: DemoProps) {
       if (!view) return;
       request.current?.abort();
       // GLRouteBuilder makes the tracker reproducible; this is not a road route.
-      const next = await GLMapSdk.buildRoute([
+      const next = await GLRouteSDK.buildRoute([
         {
           coordinates: sampleLine.slice(0, 6),
           instruction: "Continue to the crossing",

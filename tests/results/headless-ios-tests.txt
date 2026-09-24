@@ -1,0 +1,10 @@
+Test Case '-[HeadlessTests.HeadlessTests testCore]' started.
+Test Case '-[HeadlessTests.HeadlessTests testCore]' passed (5.842 seconds).
+Test Case '-[HeadlessTests.HeadlessTests testRoute]' started.
+Test Case '-[HeadlessTests.HeadlessTests testRoute]' passed (5.899 seconds).
+Test Case '-[HeadlessTests.HeadlessTests testSearch]' started.
+Test Case '-[HeadlessTests.HeadlessTests testSearch]' passed (5.304 seconds).
+Executed 3 tests, with 0 failures (0 unexpected) in 17.045 (17.057) seconds
+Executed 3 tests, with 0 failures (0 unexpected) in 17.045 (17.059) seconds
+Executed 3 tests, with 0 failures (0 unexpected) in 17.045 (17.060) seconds
+** TEST SUCCEEDED **

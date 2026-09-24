@@ -1,0 +1,35 @@
+{
+  "name": "@globus-software/glmap",
+  "version": "0.1.0-beta.1",
+  "private": true,
+  "description": "GLMap for React Native and Expo",
+  "main": "src/index.tsx",
+  "types": "src/index.tsx",
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "files": [
+    "android",
+    "ios",
+    "src",
+    "assets",
+    "expo-module.config.json",
+    "GlobusMap.podspec",
+    "app.plugin.js",
+    "plugins",
+    "LICENSE.txt",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "expo": "^57.0.0",
+    "expo-modules-core": "^57.0.0",
+    "react": "^19.0.0",
+    "react-native": "^0.86.0"
+  },
+  "dependencies": {
+    "@globus-software/glmap-core": "0.1.0-beta.1"
+  },
+  "exports": {
+    ".": "./src/index.tsx",
+    "./app.plugin.js": "./app.plugin.js",
+    "./package.json": "./package.json"
+  }
+}

@@ -25,7 +25,9 @@
     },
     "scheme": "glmap-rn-lab",
     "plugins": [
-      "glmap-rn",
+      "@globus-software/glmap",
+      "@globus-software/glsearch",
+      "@globus-software/glroute",
       "./plugins/with-tests"
     ]
   }

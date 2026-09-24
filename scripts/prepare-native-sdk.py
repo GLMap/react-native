@@ -42,27 +42,14 @@ for module in modules:
     info=plistlib.loads((dest/'Info.plist').read_bytes())
     platforms={(x['SupportedPlatform'],x.get('SupportedPlatformVariant','')) for x in info['AvailableLibraries']}
     if not {('ios',''),('ios','simulator')} <= platforms: raise SystemExit(f'{module} lacks device/simulator slices')
-shutil.copy2(sdk/'iOS/GLMapSwift/SwiftExtensions.swift',apple/'SwiftExtensions.swift')
+for name in ('SwiftExtensions.swift','CoreSwiftExtensions.swift'):
+    shutil.copy2(sdk/'iOS/GLMapSwift'/name,apple/name)
 resources=apple/'Resources'; resources.mkdir(exist_ok=True)
 for name in ('world.vm','fonts','DefaultStyle.bundle'):
     src=sdk/'Resources/framework'/name
     if src.is_dir(): shutil.copytree(src, resources/name, dirs_exist_ok=True)
     else: shutil.copy2(src,resources/name)
-(apple/'Package.swift').write_text('''// swift-tools-version:5.9
-import PackageDescription
-let package = Package(name: "GLMap", platforms: [.iOS("16.4")],
-    products: [
-        .library(name: "GLMap", targets: ["GLMap", "GLMapCore", "GLMapSwift"]),
-        .library(name: "GLSearch", targets: ["GLSearch", "GLMapCore"]),
-        .library(name: "GLRoute", targets: ["GLRoute", "GLMapCore"])
-    ], targets: [
-''' + ''.join(f'        .binaryTarget(name: "{m}", path: "{m}.xcframework"),\n' for m in modules) + '''        .target(name: "GLMapSwift", dependencies: ["GLMap", "GLMapCore"], path: ".",
-            exclude: ["GLMap.xcframework", "GLMapCore.xcframework", "GLSearch.xcframework", "GLRoute.xcframework"],
-            sources: ["SwiftExtensions.swift"],
-            resources: [.copy("Resources/world.vm"), .copy("Resources/fonts"), .copy("Resources/DefaultStyle.bundle")],
-            swiftSettings: [.define("SWIFT_PACKAGE")])
-    ])
-''')
+(apple/'Package.swift').write_text((sdk/'iOS/GLMapSwift.local.package').read_text())
 ns={'m':'http://maven.apache.org/POM/4.0.0'}
 for module in ('glmapcore','glmap','glsearch','glroute','res-defaultstyle'):
     artifact='glmap-defaultstyle' if module=='res-defaultstyle' else module
@@ -77,6 +64,7 @@ for module in ('glmapcore','glmap','glsearch','glroute','res-defaultstyle'):
     else:
         pom.write_text(f'<project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion><groupId>globus</groupId><artifactId>{artifact}</artifactId><version>{version}</version><packaging>aar</packaging></project>\n')
 manifest={'sourceRevision':revision,'sourceDiffSha256':hashlib.sha256(git('diff','HEAD','--binary').encode()).hexdigest(),
+          'swiftPackageRevision':subprocess.check_output(['git','-C',str(sdk/'iOS/GLMapSwift'),'rev-parse','HEAD'],text=True).strip(),
           'submodules':git('submodule','status').splitlines(),'version':version,'builtByThisInvocation':not args.no_build,
           'configuration':'Release','iosPlatforms':[(m, plistlib.loads((apple/f'{m}.xcframework/Info.plist').read_bytes())['AvailableLibraries']) for m in modules]}
 manifest['files']={str(p.relative_to(out)):hashlib.sha256(p.read_bytes()).hexdigest() for p in out.rglob('*') if p.is_file() and p.name!='sdk.json'}

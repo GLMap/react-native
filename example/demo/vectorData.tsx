@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import { ScrollView, Text } from "react-native";
-import { GLMapTrack, GLMapViewRef, Location, MapTouch } from "glmap-rn/demo";
+import { GLMapTrack, GLMapViewRef, MapTouch } from "@globus-software/glmap";
+import { Location } from "@globus-software/glmap-core";
 import { Action, Controls, DemoMap, DemoProps, Screen, Status, styles, useTasks } from "./common";
 import { useLocationFeed } from "./location";
 

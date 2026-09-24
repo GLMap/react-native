@@ -1,6 +1,9 @@
+import { GLSearch } from "@globus-software/glsearch";
 import React, { useEffect, useRef, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { GLMapImage, GLMapSdk, GLMapViewRef, MapTouch, Place } from "glmap-rn/demo";
+import { GLMapImage, GLMapViewRef, MapTouch } from "@globus-software/glmap";
+import { GLMapSdk } from "@globus-software/glmap-core";
+import { Place } from "@globus-software/glsearch";
 import { Action, DemoMap, DemoProps, Screen, Status, styles, useTasks } from "./common";
 
 // Podgorica, inside the bundled Montenegro map, so offline requests have data.
@@ -64,7 +67,7 @@ export function SearchDemo({ onBack }: DemoProps) {
       setStatus("");
       let places: Place[];
       try {
-        places = await GLMapSdk.search(
+        places = await GLSearch.search(
           {
             text: term,
             type,
@@ -211,7 +214,7 @@ export function POITapDemo({ onBack }: DemoProps) {
       if (!view) return;
       if (balloon.current !== null) await view.removeDrawable(balloon.current);
       balloon.current = null;
-      const found = await view.pickMapObject(touch.x, touch.y, 20);
+      const found = await GLSearch.pickMapObject(view,touch.x, touch.y, 20);
       if (!found) return setTitle("No POI here");
       const { name, latitude, longitude } = found;
       balloon.current = await view.addBalloon({

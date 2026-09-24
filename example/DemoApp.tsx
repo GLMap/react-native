@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Pressable, SectionList, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { GLMapSdk } from "glmap-rn/demo";
+import { GLMapSdk } from "@globus-software/glmap-core";
 import { FlyToDemo, ZoomToBBoxDemo } from "./demo/camera";
 import { Action, Demo, describe } from "./demo/common";
 import {

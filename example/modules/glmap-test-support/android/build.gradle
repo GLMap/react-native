@@ -12,6 +12,7 @@ rootProject.allprojects {
 }
 android {
   namespace 'software.globus.lab.testsupport'
+  sourceSets { main { assets.srcDirs += '../assets' } }
   defaultConfig { minSdkVersion 24; versionCode 1; versionName '0.1.0-beta.1' }
 }
 dependencies {

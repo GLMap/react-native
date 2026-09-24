@@ -1,17 +1,18 @@
 {
-  "nativeRevision": "b5ed76b9b68d5651f1eb78f317dcc6fcc93cceb3",
-  "nativeVersion": "2.2.0-dev.b5ed76b9b",
+  "nativeRevision": "515481f9f8e84711ccbc19e2395605959ad81540",
+  "nativeVersion": "2.2.0-dev.515481f9f",
+  "swiftPackageRevision": "04f1a99d51045456896eb7cca3fb15fb5b570866",
   "androidBuildIDs": {
-    "glmapcore": "89be51932ae43de8f5d8ff654021ac3526763c3b",
+    "glmapcore": "9f8a4d2147743b26e6c64b05ae1eb8e728b5d20d",
     "glmap": "850951e981ff44ac461c2b65c412daebded34ede",
     "glsearch": "1826f95ae4b3a82bccadfa187090f578ceb12b5f",
     "glroute": "9dc50ffa8ef5a112dadbc0a46e2efe19fca5ec5c"
   },
   "applePlatform": "device",
   "appleUUIDs": {
-    "GLMapCore": "A28BDAAB-7CFC-3825-B4AE-2D991D4A3DE1",
-    "GLMap": "601EE883-ACF2-3429-BA11-22399BAEEAEF",
-    "GLSearch": "C08F7740-6FE8-32AB-A383-38EF696E8EF2",
-    "GLRoute": "E5F9AE6A-DADA-3136-B741-2655B1F94E3D"
+    "GLMapCore": "BC61A991-25D7-3A93-970E-7AF29B645D5E",
+    "GLMap": "0675C50F-ED10-32D8-AA40-7E1F3F3663F3",
+    "GLSearch": "7C7009B7-570C-3B9D-A146-2890529F77B5",
+    "GLRoute": "30AFB295-645C-39F6-B710-A3BA5CA84D68"
   }
 }

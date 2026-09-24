@@ -10,8 +10,9 @@ args=parser.parse_args()
 if args.sdk_dir is None or not (args.apk or args.ios_app):parser.error('--sdk-dir (or GLMAP_SDK_DIR), and --apk and/or --ios-app are required')
 sdk=args.sdk_dir.resolve();meta=json.loads((sdk/'sdk.json').read_text())
 root=Path(__file__).resolve().parents[1];pin=json.loads((root/'native-sdk.json').read_text())
-assert meta['sourceRevision']==pin['sourceRevision'],'Native source differs from the recorded baseline; update the pin deliberately'
-report={'nativeRevision':meta['sourceRevision'],'nativeVersion':meta['version']}
+assert meta['sourceRevision'] in {pin['sourceRevision'],pin.get('packagingRevision')},'Native source differs from the recorded baseline; update the pin deliberately'
+assert meta.get('swiftPackageRevision')==pin.get('swiftPackageRevision'),'Swift package differs from recorded baseline'
+report={'nativeRevision':meta['sourceRevision'],'nativeVersion':meta['version'],'swiftPackageRevision':meta.get('swiftPackageRevision')}
 def elf_id(data):
     assert data[:6]==b'\x7fELF\x02\x01','Expected arm64 ELF64'
     table=struct.unpack_from('<Q',data,32)[0];size,count=struct.unpack_from('<HH',data,54)

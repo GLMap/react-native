@@ -1,12 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { BackHandler, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  errorCode,
-  GLMapView,
-  GLMapViewProps,
-  GLMapViewRef,
-} from "glmap-rn/demo";
+import { errorCode } from "@globus-software/glmap-core";
+import { GLMapView, GLMapViewProps, GLMapViewRef } from "@globus-software/glmap";
 
 export type DemoProps = { onBack: () => void };
 export type Demo = {

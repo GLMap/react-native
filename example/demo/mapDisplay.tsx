@@ -1,11 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Text } from "react-native";
-import {
-  Bounds,
-  GLMapSdk,
-  GLMapViewRef,
-  MapTouch,
-} from "glmap-rn/demo";
+import { Bounds, GLMapSdk } from "@globus-software/glmap-core";
+import { GLMapViewRef, MapTouch } from "@globus-software/glmap";
 import {
   Action,
   Controls,

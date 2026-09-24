@@ -1,73 +1,68 @@
-# GLMap for React Native / Expo
+# Globus React Native / Expo modules
 
-Native GLMap views and services for React Native Fabric and Expo development builds.
-This is a standalone npm package repository with a separate `example/` workspace.
-**Not published**; names/version and `private` remain release-preparation metadata.
-Native SDK baseline: `native-sdk.json`. GLMap 2.1.0 is not compatible.
+Planned repository: `GLMap/react-native`. Four independent packages under the owned
+npm scope `@globus-software`:
 
-## Requirements
+- `@globus-software/glmap-core`: initialization, values, datasets/downloads and location.
+- `@globus-software/glmap`: map view and drawables; Core only.
+- `@globus-software/glsearch`: search/POI APIs; Core only.
+- `@globus-software/glroute`: routing/tracking; Core only.
 
-React Native 0.86.3, Expo 57, React 19; Android API 24+ / Java 17 / NDK 29;
-iOS 16.4+ and Xcode. Expo Go cannot load this native module.
-The SDK is supplied through Maven and SwiftPM. CocoaPods integrates RN/Expo and
-the wrapper; no GLMap SDK pod publication is needed.
+```tsx
+import { GLMapSdk } from '@globus-software/glmap-core';
+import { GLMapView } from '@globus-software/glmap';
+import { GLSearch } from '@globus-software/glsearch';
+import { GLRouteSDK } from '@globus-software/glroute';
+```
 
-## Local native SDK and example
+The Core package is shared transitively. Search and Route neither import nor package
+Map. Cross-module drawing uses Core track/line providers; POI picking uses a Core
+query capability (`GLSearch.pickMapObject(view, x, y, distance)`). Native resource
+ownership is preserved instead of serializing geometry back through JavaScript.
+
+## Build
+
+RN 0.86.3, Expo 57, React 19; Android API 24+, NDK 29; iOS 16.4+. Use an Expo development
+build, not Expo Go. The native SDK pins are recorded in `native-sdk.json`.
 
 ```sh
-python3 scripts/prepare-native-sdk.py --sdk-root /path/to/glmap --output /path/to/prepared-sdk
-export GLMAP_SDK_DIR=/path/to/prepared-sdk
+python3 scripts/prepare-native-sdk.py --sdk-root /path/to/glmap --output /path/to/sdk
+export GLMAP_SDK_DIR=/path/to/sdk
 npm install
 cd example
 npx expo prebuild
 npx expo run:android
-# or npx expo run:ios
 ```
 
-The explicit override contains all four native modules, the default style and both
-Apple device/simulator slices, with versioned Maven metadata and recorded hashes.
-Unset it after GLMap 2.2.0 publication to resolve the exact public native release.
-No source checkout or laboratory directory is required by a consumer.
+Add the config plugin for every product you install. For example, an app using Map
+and Search lists `@globus-software/glmap` and `@globus-software/glsearch` in its Expo
+plugins. A Core-only app lists `@globus-software/glmap-core`. Plugins share Core setup
+and embed only their selected frameworks. The override is local and explicit; the
+default native dependency is the forthcoming exact 2.2.0 release.
 
-To use in another app, install this package through a Git/path dependency and add
-`"glmap-rn"` to Expo's `plugins`. The packaged plugin sets up native framework
-embedding, Android resource compression and the compatible C++ runtime. Rebuild
-your development client. It does not install the example test module.
+The example consumes the workspace packages. Its fixture/benchmark module and large
+offline datasets remain example-only and are not included in the public modules.
+`npm run typecheck --workspace example` validates the public call sites.
 
-```tsx
-import { GLMapSdk, GLMapView, type GLMapViewRef } from 'glmap-rn';
-await GLMapSdk.initialize(apiKey);
-// GLMapView ref: captureState, moveCamera, addImage/addTrack, layers and picking.
-```
+## iOS integration ownership
 
-Drawables belong to one map. Retained image/track handles reject after unmount;
-removal is idempotent. Service calls accept AbortSignal. Native replies are tied
-to the request instance, so old callbacks cannot settle reused IDs after Reload.
-Packed input is `[longitude, latitude]`; typed-array subviews are supported.
+Core is the sole owner of the static CoreSwift conveniences/resources. Feature pods
+use native binary-only SwiftPM products, avoiding repeated Swift symbols. Build outputs
+are aligned to prevent duplicate XCFramework signatures; a declared build phase keeps
+CocoaPods' expected header/asset paths. No signatures are disabled or removed.
 
-`example/DemoApp.tsx` contains the 20 feature screens. `npm run demo --workspace example`
-selects them; Stage A is the default test host. The old fixture/transport module
-lives only in `example/modules/glmap-test-support`, outside the package file list.
-Use your own local demo key for online services; never commit configuration keys.
+The Core config plugin also guards CocoaPods' UUID allocator before RN adds SwiftPM
+products. The pinned toolchain otherwise reproducibly reused the Pods project UUID
+for a Route product dependency and generated an unreadable project. The guard uses
+existing project IDs and does not patch installed gems or node_modules in consumers.
+Recheck these integration boundaries when upgrading RN/Expo/CocoaPods/Xcode.
 
-## Verification
+## Tests / release
 
-```sh
-npm run typecheck --workspace example
-python3 tests/run.py
-cd example
-EXPO_PUBLIC_GLMAP_API_TESTS=1 npx expo run:android --variant release
-```
+`python3 tests/run.py` checks request identity for all service owners and iOS location
+visibility; `python3 tests/downloads.py` checks Core downloads. Native API tests and
+headless Core/Search/Route probes are documented in `VERIFICATION.md`.
 
-The controlled tests compile production request-identity and iOS visibility methods;
-they do not replace real native API tests. Full build/run evidence and remaining
-release gates are in `VERIFICATION.md`. `SOURCE.md` records the extraction baseline.
-
-### iOS archive ownership
-
-The pod links the SwiftPM products exactly once. Its build-product directory is
-aligned with SwiftPM's directory to avoid Xcode 27 collecting duplicate XCFramework
-signatures during archive. A declared-input/output build phase preserves CocoaPods'
-expected module-header and asset-bundle locations; it does not strip signatures or
-copy/download SDK binaries. The example-only test pod imports the package instead
-of linking a second copy of GLMapSwift. Recheck this boundary on RN/CocoaPods/Xcode upgrades.
+Package file lists exclude examples, benchmark code, SDK binaries, caches and keys.
+Private publication flags remain set. No registry upload or remote creation is part
+of this work. Real-device, authenticated-service and release-resolution gates remain.

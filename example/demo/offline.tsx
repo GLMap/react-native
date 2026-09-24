@@ -1,13 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Alert, Pressable, SectionList, StyleSheet, Text, TextInput } from "react-native";
-import {
-  AreaProgress,
-  Bounds,
-  DataSet,
-  GLMapSdk,
-  GLMapViewRef,
-  Region,
-} from "glmap-rn/demo";
+import { AreaProgress, Bounds, DataSet, GLMapSdk, Region } from "@globus-software/glmap-core";
+import { GLMapViewRef } from "@globus-software/glmap";
 import { DemoMap, DemoProps, Screen, Status, styles, useTasks } from "./common";
 
 const megabytes = (bytes: number) => `${(bytes / 1_000_000).toFixed(1)} MB`;

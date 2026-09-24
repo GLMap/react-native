@@ -1,37 +1,11 @@
 {
-  "name": "glmap-rn",
+  "name": "globus-react-native-workspace",
   "version": "0.1.0-beta.1",
   "private": true,
   "description": "GLMap native maps and services for React Native / Expo",
-  "main": "src/index.tsx",
-  "types": "src/index.tsx",
   "license": "SEE LICENSE IN LICENSE.txt",
-  "exports": {
-    ".": "./src/index.tsx",
-    "./demo": "./src/demo.tsx",
-    "./app.plugin.js": "./app.plugin.js",
-    "./package.json": "./package.json"
-  },
-  "files": [
-    "android",
-    "ios",
-    "src",
-    "assets",
-    "expo-module.config.json",
-    "GLMapLab.podspec",
-    "app.plugin.js",
-    "plugins",
-    "native-sdk.json",
-    "LICENSE.txt",
-    "README.md"
-  ],
-  "peerDependencies": {
-    "expo": "^57.0.0",
-    "expo-modules-core": "^57.0.0",
-    "react": "^19.0.0",
-    "react-native": "^0.86.0"
-  },
   "workspaces": [
+    "packages/*",
     "example"
   ],
   "devDependencies": {

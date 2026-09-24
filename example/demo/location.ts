@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { GeoPoint, GLMapSdk, Location } from "glmap-rn/demo";
+import { GeoPoint, GLMapSdk, Location } from "@globus-software/glmap-core";
 
 function bearing(from: GeoPoint, to: GeoPoint) {
   const radians = Math.PI / 180;

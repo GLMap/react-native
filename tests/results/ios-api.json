@@ -1,1 +1,32 @@
-{"experiment":"demo-api-polish","platform":"ios","date":"2026-09-24T10:10:56.911Z","passed":true,"tests":[{"name":"Degrees and partial camera update preserve other fields","passed":true},{"name":"Packed projection, subview bounds and convenience arrays","passed":true},{"name":"Packed lines, polygon rings, markers and group pins","passed":true},{"name":"Image/track handles, packed route steps and removed handles","passed":true},{"name":"Unmount invalidates retained handles","passed":true}]}
+{
+  "experiment": "demo-api-polish",
+  "platform": "ios",
+  "date": "2026-09-24T13:38:17.655Z",
+  "passed": true,
+  "tests": [
+    {
+      "name": "Degrees and partial camera update preserve other fields",
+      "passed": true
+    },
+    {
+      "name": "Packed projection, subview bounds and convenience arrays",
+      "passed": true
+    },
+    {
+      "name": "Packed lines, polygon rings, markers and group pins",
+      "passed": true
+    },
+    {
+      "name": "Image/track handles, packed route steps and removed handles",
+      "passed": true
+    },
+    {
+      "name": "Independent Search queries and Map query capability",
+      "passed": true
+    },
+    {
+      "name": "Unmount invalidates retained handles",
+      "passed": true
+    }
+  ]
+}

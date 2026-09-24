@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
-import { Bounds, GLMapViewRef } from "glmap-rn/demo";
+import { Bounds } from "@globus-software/glmap-core";
+import { GLMapViewRef } from "@globus-software/glmap";
 import { Action, Controls, DemoMap, DemoProps, Screen, Status, useTasks } from "./common";
 
 const destinations = [

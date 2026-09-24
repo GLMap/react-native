@@ -1,0 +1,33 @@
+{
+  "name": "@globus-software/glmap-core",
+  "version": "0.1.0-beta.1",
+  "private": true,
+  "description": "GLMapCore for React Native and Expo",
+  "main": "src/index.tsx",
+  "types": "src/index.tsx",
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "files": [
+    "android",
+    "ios",
+    "src",
+    "assets",
+    "expo-module.config.json",
+    "GlobusMapCore.podspec",
+    "app.plugin.js",
+    "plugins",
+    "LICENSE.txt",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "expo": "^57.0.0",
+    "expo-modules-core": "^57.0.0",
+    "react": "^19.0.0",
+    "react-native": "^0.86.0"
+  },
+  "exports": {
+    ".": "./src/index.tsx",
+    "./app.plugin.js": "./app.plugin.js",
+    "./package.json": "./package.json",
+    "./bridge": "./src/bridge.ts"
+  }
+}

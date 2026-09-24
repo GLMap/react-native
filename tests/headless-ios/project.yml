@@ -1,0 +1,22 @@
+name: HeadlessTests
+options:
+  deploymentTarget:
+    iOS: '16.4'
+targets:
+  HeadlessTests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [HeadlessTests.swift]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: software.globus.modules.rn.tests
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_VERSION: '5.0'
+        CODE_SIGNING_ALLOWED: NO
+schemes:
+  HeadlessTests:
+    build:
+      targets:
+        HeadlessTests: [test]
+    test:
+      targets: [HeadlessTests]

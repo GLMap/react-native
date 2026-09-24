@@ -1,0 +1,17 @@
+{
+  "platforms": [
+    "apple",
+    "android"
+  ],
+  "apple": {
+    "podspecPath": "GlobusSearch.podspec",
+    "modules": [
+      "GLSearchModule"
+    ]
+  },
+  "android": {
+    "modules": [
+      "software.globus.reactnative.glsearch.GLSearchModule"
+    ]
+  }
+}

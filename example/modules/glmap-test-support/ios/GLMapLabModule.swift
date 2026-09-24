@@ -1,7 +1,7 @@
 import ExpoModulesCore
 import GLMap
 import GLMapCore
-import GLMapSwift
+import GlobusMapCore
 
 struct CameraRecord: Record {
     @Field var latitude: Double = 0
