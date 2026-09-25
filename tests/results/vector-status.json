@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "date": "2026-09-25",
+  "suite": "unified-native-vector-completion",
+  "wrapper": "react-native",
+  "sourceFingerprint": {
+    "sha256": "bde055196b75b02b18b719c0722b5a1263ab53251ea62726433fd4e229afcd62",
+    "files": 121,
+    "algorithm": "Sorted existing tracked/unignored source/configuration paths, NUL, binary SHA-256; excludes tests/results",
+    "extensions": [".dart", ".kt", ".kts", ".swift", ".m", ".h", ".py", ".ts", ".tsx", ".js", ".cjs", ".mjs", ".json", ".yaml", ".yml", ".gradle", ".podspec", ".xml", ".plist", ".pbxproj", ".xcscheme"]
+  },
+  "native": {
+    "version": "2.2.0-dev.05553b111",
+    "sourceRevision": "05553b111f1cda2f957e4b4b54f66e738115edb6",
+    "swiftPackageRevision": "621a9cc80dd75a04b26c811c090c437d3a6aaa76",
+    "sourceDiffSha256": "ef57c366a775b4238928517f16269b839c06d039361dc7dd9772747d5ea50c4d",
+    "manifestSha256": "45c1ca67628cfe69d0cacfe275c961ad10aa9d8f7554a7fbb07911ba7fee87a3",
+    "builtByThisInvocation": true,
+    "note": "Explicit local SDK override, including its pre-existing working-tree delta; native source was not edited"
+  },
+  "behavior": "Public addVectorLayer resolves only after Ready; Superseded/Cancelled reject cancelled, Failed rejects sdk_error, unmount rejects disposed. Rejected creation removes the unexposed layer.",
+  "checks": {
+    "typeScriptAndModuleChecks": "PASS",
+    "entryAndAsyncWaitHostTests": "9/9 PASS",
+    "existingNativeHostRegressions": "PASS",
+    "controlledVectorCompletionRegressions": "PASS on Kotlin/JVM and Swift/macOS: all outcomes, cleanup, duplicates, repeated disposal and late callbacks",
+    "packagedAndroidAndAppleApiInspection": "PASS",
+    "android": {"target": "Android 14 arm64 emulator", "configuration": "Release/R8", "api": "6/6 PASS", "lifecycle": "8/8 PASS", "catalogApiUiSmoke": "1/1 PASS"},
+    "ios": {"target": "iPhone 17 iOS 27.0 arm64 simulator", "configuration": "Release app / Debug XCUITest runner", "api": "6/6 PASS", "lifecycle": "8/8 PASS", "catalogApiUiSmoke": "1/1 PASS"},
+    "nativeArtifactIdentityAndCoreResources": "PASS: Android APK and iOS simulator app"
+  },
+  "commands": [
+    "python3 tests/vector_updates.py",
+    "adb -s <emulator> shell am instrument -w -r -e class software.globus.glmap.reactnative.demo.MapUiTest#defaultCatalogAndPublicApiChecks software.globus.glmap.reactnative.demo.test/androidx.test.runner.AndroidJUnitRunner",
+    "xcodebuild -project example/tests/ios/GLMapDemoUITests.xcodeproj -scheme GLMapDemoUITests -destination 'platform=iOS Simulator,id=<target>' -only-testing:GLMapDemoUITests/MapUiTests/testDefaultCatalogAndPublicApiChecks -parallel-testing-enabled NO -collect-test-diagnostics never CODE_SIGNING_ALLOWED=NO test"
+  ],
+  "limitations": ["Public dependency resolution not validated", "No signed physical-device or authenticated-service run", "No new full gesture, benchmark timing or headless runtime run"]
+}

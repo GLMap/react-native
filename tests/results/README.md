@@ -6,6 +6,9 @@ test coverage. Native dependency versions are in
 
 ## Contents
 
+- [vector-status.json](vector-status.json): unified native vector completion API,
+  Ready-gated creation and current Android/iOS API/lifecycle validation.
+
 - [demo-cleanup.json](demo-cleanup.json): catalog/public-map cleanup, current build,
   lifecycle/API/UI outcomes and additional simulator limitations.
 - `android-api.json` and `ios-api.json`: earlier combined API/lifecycle results.

@@ -190,6 +190,10 @@ export class GLMapTrack extends GLMapDrawable {
 }
 export type GLMapViewRef = Omit<NativeMapRef, "addImage" | "updateImage" | "addTrack" | "setTrackRoute" | "appendTrackPoint" | "setTrackProgress" | "addMarkerLayer" | "addVectorLayer"> & {
   addMarkerLayer(options: Omit<Parameters<NativeMapRef["addMarkerLayer"]>[0], "markers"> & { markers: MarkerSource }): ReturnType<NativeMapRef["addMarkerLayer"]>;
+  /** Resolves after native Ready (batches installed, not necessarily displayed).
+   * Superseded/cancelled preparation rejects with `cancelled`; failure rejects with `sdk_error`.
+   * Unmount settles pending work with `disposed` and releases unexposed layers.
+   */
   addVectorLayer(options: Omit<Parameters<NativeMapRef["addVectorLayer"]>[0], "source"> & { source: VectorSource }): ReturnType<NativeMapRef["addVectorLayer"]>;
   addImage(options: Parameters<NativeMapRef["addImage"]>[0]): Promise<GLMapImage>;
   addTrack(options: Parameters<NativeMapRef["addTrack"]>[0]): Promise<GLMapTrack>;

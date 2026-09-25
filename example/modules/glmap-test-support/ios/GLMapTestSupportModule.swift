@@ -177,7 +177,7 @@ final class GLMapTestSupportView: ExpoView {
         if operation == "replace" { objects = try geometry(coordinates, json) }
         else { guard let previous = entry.objects else { throw failure("missing_geometry") }; objects = previous }
         let request = retain(promise)
-        entry.native.setVectorObjects(objects, with: style, updateCompletion: { [weak self] outcome in
+        entry.native.setVectorObjects(objects, with: style, completion: { [weak self] outcome in
             let result: String
             switch outcome {
             case .ready: result = "ready"

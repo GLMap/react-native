@@ -73,7 +73,7 @@ class MapBenchmark(private val map: GLMapTextureView) {
     }
     private fun submit(start: Long, alternate: Boolean) {
         val current = ++revision
-        layer.setVectorObjectsWithResult(checkNotNull(objects), styles[if (alternate) 1 else 0]) { result ->
+        layer.setVectorObjects(checkNotNull(objects), styles[if (alternate) 1 else 0]) { result ->
             val elapsed = (System.nanoTime() - start) / 1000.0
             main.post {
                 if (!disposed) ready = doubleArrayOf(current.toDouble(), elapsed,

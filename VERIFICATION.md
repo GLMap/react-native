@@ -12,6 +12,8 @@ python3 scripts/check-modules.py
 python3 tests/run.py
 python3 tests/downloads.py
 python3 tests/readiness.py
+python3 tests/vector_updates.py
+python3 scripts/check-vector-api.py
 ```
 
 The module check enforces Core-only dependencies. The controlled regressions
@@ -186,6 +188,35 @@ remain. No signed physical-device, authenticated-service or fresh-process offlin
 restoration tests were performed. The benchmark control compiled and its entry
 isolation was checked, but no new performance measurements or standalone headless
 runtime results are claimed.
+
+### Unified native vector completions
+
+The status-bearing `setVectorObject(s)` API was validated on **2026-09-25** with
+native SDK `2.2.0-dev.05553b111`. See [vector-status.json](tests/results/vector-status.json)
+for the tested source fingerprint, revisions and artifact provenance.
+
+Public `addVectorLayer` now waits for native `Ready`, rejects cancelled/superseded
+preparation with `cancelled`, and reports preparation failure as `sdk_error`.
+Unmount settles pending work as `disposed`; rejected creations release unexposed
+layers. Both packed and asset-backed geometry follow this path. The renamed
+benchmark/support bindings use the same native completion contract.
+
+- Android 14 arm64 emulator, Release/R8: **6/6 API** and **8/8 lifecycle** scenarios
+  passed through the default catalog's native input smoke test (**1/1**).
+- iPhone 17 / iOS 27.0 arm64 simulator, Release: **6/6 API**, **8/8 lifecycle** and
+  the catalog/API native input smoke test (**1/1**) passed.
+- `tests/vector_updates.py` compiled production completion-settlement code with
+  controlled Android/iOS outcomes. Ready-only success, failure cleanup, duplicate
+  replies, repeated disposal and late callbacks all passed.
+- TypeScript, nine entry/wait host tests, existing native host regressions, module
+  boundaries, readiness checks and packaged vector API inspection passed.
+- Android/iOS native IDs and Core resources matched the new SDK artifacts.
+
+The SDK was built with its existing working-tree delta, recorded by manifest hash;
+native source was not edited. The pin was intentionally updated in all bindings.
+These runs do not establish public release resolution, physical-device or
+authenticated-service coverage. Full gesture suites, benchmark timings and
+headless runtime suites were not re-run for this migration.
 
 ## Release validation and reporting
 

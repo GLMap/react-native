@@ -57,6 +57,10 @@ loading/error state and attribution.
   updates before capturing when ordering matters.
 - Image and track handles expose `remove()`. Other drawing APIs expose numeric
   handles used with `removeDrawable()`; keep them scoped to their owner view.
+- `addVectorLayer()` resolves only after native `Ready`, when prepared batches
+  are installed (not necessarily displayed). `Superseded`/`Cancelled` reject with
+  `cancelled`; preparation failure rejects with `sdk_error`. Unmount rejects
+  outstanding work with `disposed`. A rejected creation releases its hidden handle.
 - Packed geometry arrays use longitude/latitude pairs, not latitude/longitude.
 - Import Search separately for `GLSearch.pickMapObject(...)`; Route geometry
   enters Map through Core's `TrackSource` capability.

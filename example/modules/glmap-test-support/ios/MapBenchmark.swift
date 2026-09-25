@@ -69,7 +69,7 @@ final class MapBenchmark {
     }
     private func submit(_ start: UInt64, _ alternate: Bool) {
         revision += 1; let current = revision
-        layer.setVectorObjects(objects!, with: styles[alternate ? 1 : 0], updateCompletion: { [weak self] result in
+        layer.setVectorObjects(objects!, with: styles[alternate ? 1 : 0], completion: { [weak self] result in
             guard let self else { return }
             self.ready = [Double(current), self.micros(start), result == .ready ? 1 : -1]
         })

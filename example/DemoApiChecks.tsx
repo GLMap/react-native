@@ -114,8 +114,22 @@ export default function DemoApiChecks({ apiKey = '', onBack }: { apiKey?: string
       });
       await test("Unmount invalidates retained handles", async () => {
         const image = await view.addImage({ ...center, image: { svg: "pin.svg", scale: 1 }, anchor: "bottom", drawOrder: 3 });
+        const pendingVector = view.addVectorLayer({
+          source: { line: Array.from({ length: 20000 }, (_, i) => i % 2 ? 42.43 + (i % 4) * 0.001 : 19.25 + i * 0.00001) },
+          style: 'line{width:4pt;color:red;}', drawOrder: 3,
+        }).then(() => 'ready', error => {
+          const code = errorCode(error);
+          check(code === 'disposed' || code === 'cancelled', `Unexpected vector outcome: ${String(error)}`);
+          return code;
+        });
         setVisible(false);
         for (let i = 0; i < 100 && map.current; i++) await new Promise((resolve) => setTimeout(resolve, 20));
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        try {
+          await Promise.race([pendingVector, new Promise<never>((_, reject) => {
+            timer = setTimeout(() => reject(new Error('Vector preparation did not settle on unmount')), 10000);
+          })]);
+        } finally { clearTimeout(timer); }
         check(map.current === null, "Map did not unmount");
         await rejects(() => image.update({ scale: 2 }), "disposed");
         await rejects(() => view.captureState(), "disposed");

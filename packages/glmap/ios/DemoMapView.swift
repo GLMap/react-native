@@ -446,24 +446,52 @@ final class GLMapDemoView: ExpoView {
         updateLocationVisibility(drawable)
     }
 
+    /// Ready means prepared batches are installed, not that a frame has been presented.
+    private func finishVectorUpdate(_ request: Int, _ id: Int, _ bounds: [String: Any]?, _ outcome: GLMapVectorLayerUpdateResult) {
+        guard let promise = release(request) else { return }
+        switch outcome {
+        case .ready:
+            promise.resolve(["id": id, "bounds": bounds] as [String: Any?])
+        case .superseded, .cancelled:
+            removeDrawable(id)
+            promise.reject(.cancelled)
+        case .failed:
+            removeDrawable(id)
+            promise.reject(.sdk("Vector preparation failed"))
+        @unknown default:
+            removeDrawable(id)
+            promise.reject(.sdk("Unknown vector update outcome"))
+        }
+    }
+
     func addVectorLayer(_ options: DemoVectorLayerRecord, _ coordinates: NativeArrayBuffer?, _ promise: Promise) {
         guard !disposed else { promise.reject(.disposed); return }
+        var request: Int?
         do {
             let order = try drawOrder(options.drawOrder), source = options.source
             guard let style = GLMapVectorCascadeStyle.createStyle(options.style) else { throw DemoFailure.invalid("Invalid style \(options.style)") }
             guard (coordinates == nil) != (source.asset == nil) else { throw DemoFailure.invalid("A vector layer needs one source") }
-            let show: (GLMapVectorObjectArray) -> [String: Any?] = { [self] objects in
+            let token = retain(promise)
+            request = token
+            let show: (GLMapVectorObjectArray) -> Void = { [weak self] objects in
+                guard let self, pending[token] != nil else { return }
                 let layer = GLMapVectorLayer(drawOrder: order), drawable = DemoDrawable()
-                layer.setVectorObjects(objects, with: style, completion: nil)
                 drawable.vectorObjects = objects
                 drawable.objects = [layer]
-                return ["id": add(drawable), "bounds": objects.bbox.record]
+                let bounds = objects.bbox.record, id = add(drawable)
+                layer.setVectorObjects(objects, with: style, completion: { [weak self] outcome in
+                    self?.finishVectorUpdate(token, id, bounds, outcome)
+                })
             }
             if let asset = source.asset {
-                let path = try DemoAssets.path(asset), request = retain(promise)
+                let path = try DemoAssets.path(asset)
                 DispatchQueue.global().async {
                     let loaded = Result { try GLMapVectorObject.createVectorObjects(fromFile: path) }
-                    DispatchQueue.main.async { [weak self] in self?.release(request)?.settle { show(try loaded.get()) } }
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self, pending[token] != nil else { return }
+                        do { show(try loaded.get()) }
+                        catch { release(token)?.reject(DemoFailure(error)) }
+                    }
                 }
                 return
             }
@@ -474,8 +502,11 @@ final class GLMapDemoView: ExpoView {
             guard let object = builder.build() else { throw DemoFailure.sdk("GeometryBuilder returned no object") }
             let objects = GLMapVectorObjectArray()
             objects.add(object)
-            promise.resolve(show(objects))
-        } catch { promise.reject(DemoFailure(error)) }
+            show(objects)
+        } catch {
+            if let request { release(request)?.reject(DemoFailure(error)) }
+            else { promise.reject(DemoFailure(error)) }
+        }
     }
     func pickVectorObject(_ id: Int, _ x: Double, _ y: Double, _ distance: Double) throws -> String? {
         guard let objects = try drawable(id).vectorObjects else { throw DemoFailure.invalid("Drawable \(id) is not a vector layer") }

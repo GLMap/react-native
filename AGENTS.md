@@ -24,7 +24,9 @@ examples and tests.
   versions or add machine-specific paths.
 - Run `npm run typecheck --workspace example`, `node --test tests/example.test.cjs`,
   `python3 scripts/check-modules.py`, `python3 tests/run.py` and
-  `python3 tests/downloads.py` and `python3 tests/readiness.py`. Re-run Android/iOS
+  `python3 tests/downloads.py`, `python3 tests/readiness.py`,
+  `python3 tests/vector_updates.py` and `python3 scripts/check-vector-api.py`.
+  Re-run Android/iOS
   integration suites for API or platform changes, and API/lifecycle suites whenever
   the native SDK pin changes.
 - Report checks actually performed. Distinguish host tests, emulator/simulator

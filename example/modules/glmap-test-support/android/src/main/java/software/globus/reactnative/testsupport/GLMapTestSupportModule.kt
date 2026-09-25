@@ -195,7 +195,7 @@ class GLMapTestSupportView(context: Context, appContext: AppContext) : ExpoView(
             val objects = if (replacing) geometry(coordinates, json) else checkNotNull(entry.objects) { "missing_geometry" }
             pending.add(promise)
             try {
-                entry.native.setVectorObjectsWithResult(objects, style) { outcome ->
+                entry.native.setVectorObjects(objects, style) { outcome ->
                     val result = when (outcome) {
                         GLMapVectorLayer.UpdateResult.Ready -> "ready"
                         GLMapVectorLayer.UpdateResult.Superseded -> "superseded"

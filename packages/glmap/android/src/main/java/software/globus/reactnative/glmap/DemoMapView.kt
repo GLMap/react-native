@@ -470,32 +470,70 @@ class GLMapDemoView(context: Context, appContext: AppContext) : ExpoView(context
         drawable.objects.forEach { it.isHidden = false }
     }
 
+    /** A handle is exposed only after the SDK reports Ready, never merely after submission. */
+    private fun finishVectorUpdate(promise: Promise, id: Int, bounds: Map<String, Double>?, outcome: Int) {
+        if (!pending.remove(promise)) return // Unmount or another terminal callback already settled it.
+        if (outcome == GLMapVectorLayer.UpdateResult.Ready) {
+            promise.resolve(mapOf("id" to id, "bounds" to bounds))
+        } else {
+            removeDrawable(id)
+            when (outcome) {
+                GLMapVectorLayer.UpdateResult.Superseded, GLMapVectorLayer.UpdateResult.Cancelled -> promise.reject(DemoFailure.cancelled())
+                GLMapVectorLayer.UpdateResult.Failed -> promise.reject(DemoFailure.sdk("Vector preparation failed"))
+                else -> promise.reject(DemoFailure.sdk("Unknown vector update outcome: $outcome"))
+            }
+        }
+    }
+
     fun addVectorLayer(options: DemoVectorLayerRecord, coordinates: NativeArrayBuffer?, promise: Promise) {
         if (disposed) { promise.reject(DemoFailure.disposed()); return }
+        var retained = false
         try {
             val source = options.source
             if ((coordinates == null) == (source.asset == null)) throw DemoFailure.invalid("A vector layer needs one source")
-            if (source.asset?.contains('/') == true) throw DemoFailure.notFound("Asset ${source.asset} is not bundled")
-            val rings = coordinates?.demoLines(source.counts) ?: emptyList()
-            val style = GLMapVectorCascadeStyle.createStyle(options.style) ?: throw DemoFailure.invalid("Invalid style ${options.style}")
-            fun show(objects: GLMapVectorObjectList): Map<String, Any?> {
-                val layer = GLMapVectorLayer(options.drawOrder)
-                style.use { layer.setVectorObjects(objects, it, null) }
-                return mapOf("id" to add(DemoDrawable(listOf(layer)).also { it.vectorObjects = objects }), "bounds" to objects.bBox.record())
-            }
             val asset = source.asset
+            if (asset?.contains('/') == true) throw DemoFailure.notFound("Asset $asset is not bundled")
+            val rings = coordinates?.demoLines(source.counts) ?: emptyList()
+            if (asset == null && !rings.all { it.size >= 4 && it.size % 2 == 0 && it.all(Double::isFinite) }) throw DemoFailure.invalid("Expected longitude/latitude pairs")
+            val style = GLMapVectorCascadeStyle.createStyle(options.style) ?: throw DemoFailure.invalid("Invalid style ${options.style}")
+            fun show(objects: GLMapVectorObjectList) {
+                style.use { parsed ->
+                    if (!pending.contains(promise)) { objects.close(); return }
+                    var id: Int? = null
+                    try {
+                        val bounds = objects.bBox.record()
+                        val layer = GLMapVectorLayer(options.drawOrder)
+                        val handle = ++lastDrawable
+                        id = handle
+                        drawables[handle] = DemoDrawable(listOf(layer)).also { it.vectorObjects = objects }
+                        renderer.add(layer)
+                        layer.setVectorObjects(objects, parsed) { outcome ->
+                            finishVectorUpdate(promise, handle, bounds, outcome)
+                        }
+                    } catch (error: Exception) {
+                        if (id != null) removeDrawable(id) else objects.close()
+                        throw error
+                    }
+                }
+            }
+            pending.add(promise)
+            retained = true
             if (asset != null) {
-                pending.add(promise)
-                thread(name = "GLMap demo GeoJSON") {
+                thread(name = "GLMap GeoJSON") {
                     val loaded = runCatching { context.assets.open(asset).use(GLMapVectorObject::createFromGeoJSONStreamOrThrow) }
                     main.post {
-                        if (pending.remove(promise)) promise.settle { show(loaded.getOrThrow()) }
-                        else { loaded.getOrNull()?.close(); style.close() }
+                        if (!pending.contains(promise)) { loaded.getOrNull()?.close(); style.close() }
+                        else if (loaded.isFailure) {
+                            style.close()
+                            if (pending.remove(promise)) promise.reject(DemoFailure.of(loaded.exceptionOrNull()!!))
+                        } else {
+                            try { show(loaded.getOrThrow()) }
+                            catch (error: Exception) { if (pending.remove(promise)) promise.reject(DemoFailure.of(error)) }
+                        }
                     }
                 }
                 return
             }
-            if (!rings.all { it.size >= 4 && it.size % 2 == 0 && it.all(Double::isFinite) }) { style.close(); throw DemoFailure.invalid("Expected longitude/latitude pairs") }
             val objects = GLMapVectorObjectList()
             try {
                 GeometryBuilder().use { builder ->
@@ -504,8 +542,8 @@ class GLMapDemoView(context: Context, appContext: AppContext) : ExpoView(context
                     (builder.build() ?: throw DemoFailure.sdk("GeometryBuilder returned no object")).use { objects.insertObject(0, it) }
                 }
             } catch (error: Exception) { objects.close(); style.close(); throw error }
-            promise.resolve(show(objects))
-        } catch (error: Exception) { promise.reject(DemoFailure.of(error)) }
+            show(objects)
+        } catch (error: Exception) { if (!retained || pending.remove(promise)) promise.reject(DemoFailure.of(error)) }
     }
     fun pickVectorObject(id: Int, x: Double, y: Double, distance: Double): String? {
         val objects = drawable(id).vectorObjects ?: throw DemoFailure.invalid("Drawable $id is not a vector layer")
