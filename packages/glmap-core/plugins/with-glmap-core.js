@@ -40,7 +40,7 @@ module.exports = function withGLMapCore(config, frameworks = []) {
     return config;
   });
   config = withProjectBuildGradle(config, (config) => {
-    // GLMap's local Release AAR uses NDK 29. The app must package its compatible libc++.
+    // GLMap 2.2.0 uses NDK 29. The app must package its compatible libc++.
     const line = "ext.ndkVersion = '29.0.14206865'";
     if (!config.modResults.contents.includes(line)) {
       config.modResults.contents = config.modResults.contents.replace(

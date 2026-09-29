@@ -4,6 +4,16 @@ The demo is a catalog of **20 React Native / Expo API examples** for Android and
 iOS. Each feature screen keeps SDK calls close to its UI. For installation,
 launch commands and API keys, see [Run the demo](../README.md#run-the-demo).
 
+## Native SDK release
+
+Both generated hosts use the published GLMap **2.2.0** artifacts through the
+workspace packages: Maven on Android and exact-version SwiftPM on iOS. The native
+test-support module uses the same release. After updating the checkout, run
+`npm install` at the repository root, then `npx expo prebuild` from `example/`
+and rebuild the app. Back up custom native-host edits before regenerating.
+Reloading JavaScript alone does not replace native binaries. See
+[VERIFICATION.md](../VERIFICATION.md) for public API and lifecycle checks.
+
 ## Directory structure
 
 ```text

@@ -22,8 +22,21 @@ examples**.
 - A suitable GLMap API key and network access for online maps, search, routing
   and downloads. Offline operations need data covering the requested area.
 
-The packages resolve native GLMap SDK 2.2.0 from the public Maven repository on
-Android and [GLMapSwift](https://github.com/GLMap/GLMapSwift) on iOS.
+The packages and demo pin the released native **GLMap SDK 2.2.0** from the public
+Maven repository on Android and [GLMapSwift](https://github.com/GLMap/GLMapSwift)
+on iOS. The npm packages have their own version (`0.1.0-beta.1`); it is not the
+native SDK version.
+
+### Updating to native SDK 2.2.0
+
+Run `npm install`, regenerate the host with `npx expo prebuild` and rebuild the
+native app; a JavaScript/OTA update alone cannot update native frameworks. Back
+up any custom native-project changes before regeneration. Keep Core, Map, Search
+and Route on the same native release. Initialize Core before mounting a map or
+using headless services. Vector-layer creation succeeds only after native
+`Ready`; superseded/cancelled updates reject with `cancelled`, and failed updates
+with `sdk_error`. `Ready` does not certify presentation of a rendered frame.
+See [verification](VERIFICATION.md) for release checks and their scope.
 
 ## Add a map to your app
 

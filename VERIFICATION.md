@@ -120,6 +120,32 @@ result. The iOS assertions are in `tests/headless-ios/`; their apps must be inst
 before the suite runs. Do not treat a combined demo build as proof of headless
 module isolation.
 
+## Published GLMap 2.2.0 validation — 2026-09-29
+
+The native release is pinned to `36a343f9275d76734466ecae1f39b9c0e0655a8b` and
+SwiftPM tag `2.2.0` to `b07267c4bdd7cfcde5e001708c95d897eaa2f19a`. These checks
+used public Maven/SwiftPM artifacts with `GLMAP_SDK_DIR` unset. See
+[release-2.2.0.json](tests/results/release-2.2.0.json) for the run summary:
+
+- TypeScript, all **9/9** Node example tests, module/pin checks, vector call-site
+  checks, and controlled ownership/download/readiness/vector regressions passed.
+- Expo prebuild and CocoaPods integration passed. Android Release/R8 app and
+  instrumentation APKs and the iOS Release simulator app built successfully.
+- Android 17 arm64 emulator: `defaultCatalogAndPublicApiChecks` passed (**1/1**),
+  exercising public lifecycle and API checks and catalog/Dark Theme navigation.
+- iPhone 17 / iOS 27.0 arm64 simulator: `testDefaultCatalogAndPublicApiChecks`
+  passed (**1/1**) with the same coverage. Public API reports passed **6/6** on
+  each platform; public lifecycle reports passed **8/8** on each platform.
+- Packaged Android ELF build IDs and iOS simulator framework UUIDs matched the
+  public 2.2.0 artifacts. Android `world.vm` remained uncompressed. Public vector
+  headers/classes were also inspected for the status-bearing completion API.
+
+These are workspace builds and emulator/simulator runs, not clean-checkout or
+physical-device validation. Full gesture, headless, authenticated-service,
+benchmark and offline-restoration suites were not repeated. Third-party build
+warnings remain. Earlier results below retain their original dev SDK scope;
+references to matching pins describe the pins at the time of those runs.
+
 ## Recorded results
 
 The verification summary dated **2026-09-24** and the saved

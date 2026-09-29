@@ -1,11 +1,11 @@
 {
   "releaseVersion": "2.2.0",
-  "status": "unreleased; local validation uses an explicit GLMAP_SDK_DIR",
-  "sourceRevision": "05553b111f1cda2f957e4b4b54f66e738115edb6",
+  "status": "released",
+  "sourceRevision": "36a343f9275d76734466ecae1f39b9c0e0655a8b",
   "swiftPackage": "https://github.com/GLMap/GLMapSwift.git",
   "androidRepository": "https://maven.globus.software/artifactory/libs",
   "minimumIOS": "16.4",
   "minimumAndroid": 24,
-  "swiftPackageRevision": "621a9cc80dd75a04b26c811c090c437d3a6aaa76",
+  "swiftPackageRevision": "b07267c4bdd7cfcde5e001708c95d897eaa2f19a",
   "vectorUpdateContract": "setVectorObject(s) completion reports Ready, Superseded, Cancelled or Failed"
 }

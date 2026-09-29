@@ -1,0 +1,42 @@
+{
+  "date": "2026-09-29",
+  "wrapperBaseRevision": "4e8c426c3fd755b9994486d67cfb93dec1e14cdf",
+  "scope": "Working tree release update; public dependencies, GLMAP_SDK_DIR unset",
+  "nativeVersion": "2.2.0",
+  "nativeRevision": "36a343f9275d76734466ecae1f39b9c0e0655a8b",
+  "swiftPackageRevision": "b07267c4bdd7cfcde5e001708c95d897eaa2f19a",
+  "toolchain": {"reactNative": "0.86.3", "expo": "57.0.23", "kotlinHostTests": "2.4.20", "xcode": "27.0"},
+  "checks": {
+    "npm run typecheck --workspace example": "passed",
+    "node --test tests/example.test.cjs": "9/9 passed",
+    "python3 scripts/check-modules.py": "passed, including native and demo test-support pins",
+    "python3 scripts/check-vector-api.py": "passed",
+    "python3 tests/run.py": "passed",
+    "python3 tests/downloads.py": "passed",
+    "python3 tests/readiness.py": "passed",
+    "python3 tests/vector_updates.py": "passed",
+    "EXPO_NO_DOTENV=1 npx expo prebuild --no-install": "passed",
+    "pod install": "passed",
+    "androidBuild": "Release/R8 app and instrumentation APKs passed, arm64-v8a",
+    "iosBuild": "Release simulator app passed, CODE_SIGNING_ALLOWED=NO",
+    "androidRuntime": {"target": "Android 17 arm64 emulator", "apiPassed": 6, "lifecyclePassed": 8, "uiSmokePassed": 1, "failed": 0},
+    "iosRuntime": {"target": "iPhone 17 / iOS 27.0 arm64 simulator", "apiPassed": 6, "lifecyclePassed": 8, "uiSmokePassed": 1, "failed": 0}
+  },
+  "androidTest": "AndroidJUnitRunner: software.globus.glmap.reactnative.demo.MapUiTest#defaultCatalogAndPublicApiChecks",
+  "iosTest": "xcodebuild test -only-testing:GLMapDemoUITests/MapUiTests/testDefaultCatalogAndPublicApiChecks -parallel-testing-enabled NO",
+  "androidBuildIDs": {
+    "glmapcore": "eb1676603d2d70a75ca430911603227b7feb1830",
+    "glmap": "4e5c6c0e44354637435cb8dfb638f851d3b56ebd",
+    "glsearch": "9c3627ccfa6d377badfdcb2295119259a713edda",
+    "glroute": "09ad6a099eeaafdb3d30d0c5bc1e3cb8d0bb975d"
+  },
+  "iosSimulatorUUIDs": {
+    "GLMapCore": "4A38A556-C2E2-3179-B7BC-7A503B00C431",
+    "GLMap": "EB46E052-CAE6-3B57-B659-D9339B7DE08A",
+    "GLSearch": "2AED5B66-4BAC-3AD2-9A4E-70F70DF0F18B",
+    "GLRoute": "3370FFE1-E3D5-3974-9171-BF8D478B2847"
+  },
+  "artifactChecks": "App ELF IDs match public Maven 2.2.0 AARs; simulator UUIDs match SHA-256-verified public XCFrameworks; Android world.vm is uncompressed; published vector headers/classes checked",
+  "setupNotes": "Host Kotlin tests initially lacked cached 2.4.20 compiler dependencies; passed after Gradle resolved them",
+  "notRun": ["fresh checkout", "physical devices", "device Release build", "headless apps", "full gesture suites", "benchmarks", "authenticated services", "offline restoration", "publication"]
+}
