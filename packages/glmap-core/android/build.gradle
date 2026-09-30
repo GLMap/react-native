@@ -1,7 +1,8 @@
 apply plugin: 'com.android.library'
 apply plugin: 'expo-module-gradle-plugin'
 group = 'globus'
-version = '0.1.0-beta.1'
+def packageJson = new groovy.json.JsonSlurper().parse(file('../package.json'))
+version = packageJson.version
 def sdkDirectory = System.getenv('GLMAP_SDK_DIR')
 def sdkVersion = sdkDirectory ? new groovy.json.JsonSlurper().parse(new File(sdkDirectory, 'sdk.json')).version : '2.2.0'
 rootProject.allprojects {
@@ -12,7 +13,7 @@ rootProject.allprojects {
 }
 android {
   namespace 'software.globus.reactnative.core'
-  defaultConfig { minSdkVersion 24; versionCode 1; versionName '0.1.0-beta.1' }
+  defaultConfig { minSdkVersion 24; versionCode 1; versionName packageJson.version }
   sourceSets { main { assets.srcDirs += '../assets' } }
 }
 dependencies {

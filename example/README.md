@@ -11,8 +11,14 @@ workspace packages: Maven on Android and exact-version SwiftPM on iOS. The nativ
 test-support module uses the same release. After updating the checkout, run
 `npm install` at the repository root, then `npx expo prebuild` from `example/`
 and rebuild the app. Back up custom native-host edits before regenerating.
-Reloading JavaScript alone does not replace native binaries. See
-[VERIFICATION.md](../VERIFICATION.md) for public API and lifecycle checks.
+Reloading JavaScript alone does not replace native binaries.
+
+The demo owns its iOS permission prompt and scene manifest in `app.json`. Its
+explicit `plugins/with-expo-scenes.js` adapts the pinned Expo 57 blank Swift
+AppDelegate to `EXExpoAppSceneDelegate` for iOS 27. It is idempotent and rejects
+unexpected startup templates rather than deleting custom app code. This is an
+app-specific plugin, not part of any published SDK package. Keep your own app's
+location explanation and scene lifecycle instead of copying the demo's settings.
 
 ## Directory structure
 
@@ -38,6 +44,7 @@ example/
 ├── modules/glmap-test-support/ # Result files, datasets and private benchmark view
 ├── scripts/demo-env.mjs        # Optional catalog key configuration
 ├── plugins/with-tests.js       # Configures the native test hosts
+├── plugins/with-expo-scenes.js # Explicit, app-owned Expo scene migration
 ├── tests/                     # Android input tests and iOS UI tests
 ├── app.json                   # Expo host and feature-plugin configuration
 └── package.json               # Workspace dependencies and run scripts
@@ -149,5 +156,4 @@ or benchmarks into the public npm packages.
    during cleanup.
 5. Update this guide and the relevant checks in `DemoApiChecks.tsx` or native tests.
 
-See [VERIFICATION.md](../VERIFICATION.md) for TypeScript, controlled regressions,
-native API/input tests and isolated Core/Search/Route probes.
+Contributor checks are listed in [AGENTS.md](../AGENTS.md).

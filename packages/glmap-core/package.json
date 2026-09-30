@@ -1,7 +1,18 @@
 {
   "name": "@globus-software/glmap-core",
-  "version": "0.1.0-beta.1",
-  "private": true,
+  "version": "0.1.0-beta.2",
+  "homepage": "https://globus.software",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GLMap/react-native.git",
+    "directory": "packages/glmap-core"
+  },
+  "bugs": "https://github.com/GLMap/react-native/issues",
+  "publishConfig": {
+    "access": "public",
+    "tag": "beta",
+    "registry": "https://registry.npmjs.org/"
+  },
   "description": "GLMapCore for React Native and Expo",
   "main": "src/index.tsx",
   "types": "src/index.tsx",

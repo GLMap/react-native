@@ -71,7 +71,7 @@ not only TypeScript checks.
    behavior. Use Core capabilities for cross-package operations.
 3. Update the package README and an example that exercises the public API.
 4. Add regressions for removal, unmount, repeated cleanup and concurrent calls.
-5. Run the checks in [VERIFICATION.md](VERIFICATION.md), including relevant native
+5. Run the contributor checks in [AGENTS.md](AGENTS.md), including relevant native
    suites. Native dependency changes require renewed API and lifecycle checks on
    both platforms.
 

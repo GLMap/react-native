@@ -7,7 +7,7 @@ renderer.
 ## Installation
 
 ```sh
-npx expo install @globus-software/glsearch @globus-software/glmap-core
+npx expo install @globus-software/glsearch@beta @globus-software/glmap-core@beta
 ```
 
 Add `@globus-software/glsearch` to `expo.plugins` in `app.json`, then regenerate

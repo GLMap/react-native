@@ -1,6 +1,9 @@
+require 'json'
+package = JSON.parse(File.read(File.join(__dir__, 'package.json')))
+
 Pod::Spec.new do |s|
   s.name = 'GlobusMapCore'
-  s.version = '0.1.0-beta.1'
+  s.version = package.fetch('version')
   s.summary = 'GLMapCore React Native module'
   s.license = { :type => 'Proprietary' }
   s.author = 'Globus'

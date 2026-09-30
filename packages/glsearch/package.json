@@ -1,7 +1,18 @@
 {
   "name": "@globus-software/glsearch",
-  "version": "0.1.0-beta.1",
-  "private": true,
+  "version": "0.1.0-beta.2",
+  "homepage": "https://globus.software",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GLMap/react-native.git",
+    "directory": "packages/glsearch"
+  },
+  "bugs": "https://github.com/GLMap/react-native/issues",
+  "publishConfig": {
+    "access": "public",
+    "tag": "beta",
+    "registry": "https://registry.npmjs.org/"
+  },
   "description": "GLSearch for React Native and Expo",
   "main": "src/index.tsx",
   "types": "src/index.tsx",
@@ -25,7 +36,7 @@
     "react-native": "^0.86.0"
   },
   "dependencies": {
-    "@globus-software/glmap-core": "0.1.0-beta.1"
+    "@globus-software/glmap-core": "0.1.0-beta.2"
   },
   "exports": {
     ".": "./src/index.tsx",

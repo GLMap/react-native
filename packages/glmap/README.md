@@ -7,7 +7,7 @@ on Search or Route.
 ## Installation
 
 ```sh
-npx expo install @globus-software/glmap @globus-software/glmap-core
+npx expo install @globus-software/glmap@beta @globus-software/glmap-core@beta
 ```
 
 Add `@globus-software/glmap` to `expo.plugins` in `app.json`, then regenerate and

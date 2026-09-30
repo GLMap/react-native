@@ -9,10 +9,10 @@
     "react": "19.2.3",
     "react-native": "0.86.3",
     "react-native-safe-area-context": "~5.7.0",
-    "@globus-software/glmap-core": "0.1.0-beta.1",
-    "@globus-software/glmap": "0.1.0-beta.1",
-    "@globus-software/glsearch": "0.1.0-beta.1",
-    "@globus-software/glroute": "0.1.0-beta.1"
+    "@globus-software/glmap-core": "0.1.0-beta.2",
+    "@globus-software/glmap": "0.1.0-beta.2",
+    "@globus-software/glsearch": "0.1.0-beta.2",
+    "@globus-software/glroute": "0.1.0-beta.2"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",

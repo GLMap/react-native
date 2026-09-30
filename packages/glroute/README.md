@@ -7,7 +7,7 @@ renderer.
 ## Installation
 
 ```sh
-npx expo install @globus-software/glroute @globus-software/glmap-core
+npx expo install @globus-software/glroute@beta @globus-software/glmap-core@beta
 ```
 
 Add `@globus-software/glroute` to `expo.plugins` in `app.json`, then regenerate and

@@ -1,6 +1,9 @@
+require 'json'
+package = JSON.parse(File.read(File.join(__dir__, 'package.json')))
+
 Pod::Spec.new do |s|
   s.name = 'GlobusRoute'
-  s.version = '0.1.0-beta.1'
+  s.version = package.fetch('version')
   s.summary = 'GLRoute React Native module'
   s.license = { :type => 'Proprietary' }
   s.author = 'Globus'
@@ -10,7 +13,7 @@ Pod::Spec.new do |s|
   s.swift_version = '5.9'
   s.static_framework = true
   s.dependency 'ExpoModulesCore'
-  s.dependency 'GlobusMapCore', '0.1.0-beta.1'
+  s.dependency 'GlobusMapCore', package.fetch('dependencies').fetch('@globus-software/glmap-core')
   s.source_files = 'ios/*.swift'
   sdk = ENV['GLMAP_SDK_DIR']
   spm_dependency(s, url: sdk ? File.join(sdk,'ios') : 'https://github.com/GLMap/GLMapSwift.git',

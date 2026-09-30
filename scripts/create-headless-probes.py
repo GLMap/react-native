@@ -7,15 +7,20 @@ parser.add_argument('--output',required=True,type=Path)
 args=parser.parse_args()
 repo=Path(__file__).resolve().parents[1];out=args.output.resolve();out.mkdir(parents=True,exist_ok=True)
 tars=repo/'build/module-tarballs';tars.mkdir(parents=True,exist_ok=True)
+scene_manifest=json.loads((repo/'example/app.json').read_text())['expo']['ios']['infoPlist']['UIApplicationSceneManifest']
 # Repack current source after fixes. These archives are local test inputs, not publications.
+packed={}
 for mod in ('glmap-core','glsearch','glroute'):
- subprocess.run(['npm','pack','--workspace','@globus-software/'+mod,'--pack-destination',str(tars),'--silent'],cwd=repo,check=True,stdout=subprocess.DEVNULL)
+ result=subprocess.check_output(['npm','pack','--workspace','@globus-software/'+mod,'--pack-destination',str(tars),'--json'],cwd=repo,text=True)
+ packed[mod]=tars/json.loads(result)[0]['filename']
 for name,mod in [('core','glmap-core'),('search','glsearch'),('route','glroute')]:
  app=out/name;app.mkdir(exist_ok=True)
- package={'name':'headless-'+name,'version':'0.0.1','private':True,'main':'index.ts','dependencies':{'expo':'57.0.23','react':'19.2.3','react-native':'0.86.3','@globus-software/glmap-core':'file:'+str(tars/'globus-software-glmap-core-0.1.0-beta.1.tgz')},'devDependencies':{'@types/react':'~19.2.2','typescript':'~6.0.3'}}
- if mod!='glmap-core':package['dependencies']['@globus-software/'+mod]='file:'+str(tars/f'globus-software-{mod}-0.1.0-beta.1.tgz')
+ package={'name':'headless-'+name,'version':'0.0.1','private':True,'main':'index.ts','dependencies':{'expo':'57.0.23','react':'19.2.3','react-native':'0.86.3','@globus-software/glmap-core':'file:'+str(packed['glmap-core'])},'devDependencies':{'@types/react':'~19.2.2','typescript':'~6.0.3'}}
+ if mod!='glmap-core':package['dependencies']['@globus-software/'+mod]='file:'+str(packed[mod])
  (app/'package.json').write_text(json.dumps(package,indent=2)+'\n')
- (app/'app.json').write_text(json.dumps({'expo':{'name':'GLProbe'+name,'slug':'gl-probe-'+name,'ios':{'bundleIdentifier':'software.globus.modules.rn'+name},'android':{'package':'software.globus.modules.rn'+name},'plugins':['@globus-software/'+mod]+(['./with-data'] if name=='search' else [])}},indent=2)+'\n')
+ (app/'app.json').write_text(json.dumps({'expo':{'name':'GLProbe'+name,'slug':'gl-probe-'+name,'ios':{'bundleIdentifier':'software.globus.modules.rn'+name,'infoPlist':{'UIApplicationSceneManifest':scene_manifest}},'android':{'package':'software.globus.modules.rn'+name},'plugins':['@globus-software/'+mod,'./with-expo-scenes']+(['./with-data'] if name=='search' else [])}},indent=2)+'\n')
+ # The test apps own their Expo scene lifecycle; it is not an SDK side effect.
+ shutil.copy2(repo/'example/plugins/with-expo-scenes.js',app/'with-expo-scenes.js')
  code='''import React,{useEffect,useState} from 'react';
 import {View,Text} from 'react-native';
 import {registerRootComponent} from 'expo';

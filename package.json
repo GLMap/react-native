@@ -1,6 +1,5 @@
 {
   "name": "globus-react-native-workspace",
-  "version": "0.1.0-beta.1",
   "private": true,
   "description": "GLMap native maps and services for React Native / Expo",
   "license": "SEE LICENSE IN LICENSE.txt",

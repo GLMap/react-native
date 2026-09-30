@@ -1,8 +1,6 @@
 const {
   withProjectBuildGradle,
   withAppBuildGradle,
-  withInfoPlist,
-  withAppDelegate,
   withXcodeProject,
   withPodfile,
 } = require("expo/config-plugins");
@@ -57,24 +55,8 @@ module.exports = function withGLMapCore(config, frameworks = []) {
       config.modResults.contents += `\n${block}\n`;
     return config;
   });
-  // The pinned blank Expo template still starts UIWindow in AppDelegate. iOS 27
-  // requires scenes; use Expo's own scene delegate and event forwarding.
-  config = withInfoPlist(config, (config) => {
-    config.modResults.NSLocationWhenInUseUsageDescription =
-      "The demo shows your position on the map and navigates from it.";
-    config.modResults.UIApplicationSceneManifest = {
-      UIApplicationSupportsMultipleScenes: false,
-      UISceneConfigurations: {
-        UIWindowSceneSessionRoleApplication: [
-          {
-            UISceneConfigurationName: "Default Configuration",
-            UISceneDelegateClassName: "EXExpoAppSceneDelegate",
-          },
-        ],
-      },
-    };
-    return config;
-  });
+  // Permission prompts, scene lifecycle and AppDelegate belong to the host app.
+  // Do not register Info.plist or AppDelegate mods from the SDK plugin.
   config = withPodfile(config, (config) => {
     const marker = '# GLMap: collision-safe IDs before RN adds SwiftPM products';
     if (!config.modResults.contents.includes(marker)) {
@@ -93,17 +75,5 @@ module.exports = function withGLMapCore(config, frameworks = []) {
     }
     return config;
   });
-  return withAppDelegate(config, (config) => {
-    let source = config.modResults.contents;
-    source = source.replace(
-      "class AppDelegate: ExpoAppDelegate {",
-      "class AppDelegate: ExpoAppDelegate, ExpoReactNativeFactoryProvider {",
-    );
-    source = source.replace(
-      /#if os\(iOS\) \|\| os\(tvOS\)\n    window = UIWindow[\s\S]*?#endif/,
-      "// ExpoAppSceneDelegate creates the window and starts React Native.",
-    );
-    config.modResults.contents = source;
-    return config;
-  });
+  return config;
 };

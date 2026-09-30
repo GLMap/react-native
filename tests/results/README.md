@@ -1,8 +1,6 @@
 # Verification evidence
 
-See [VERIFICATION.md](../../VERIFICATION.md) for commands, recorded outcomes and
-test coverage. Native dependency versions are in
-[native-sdk.json](../../native-sdk.json).
+Native dependency versions are in [native-sdk.json](../../native-sdk.json).
 
 ## Contents
 

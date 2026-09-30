@@ -24,8 +24,7 @@ examples**.
 
 The packages and demo pin the released native **GLMap SDK 2.2.0** from the public
 Maven repository on Android and [GLMapSwift](https://github.com/GLMap/GLMapSwift)
-on iOS. The npm packages have their own version (`0.1.0-beta.1`); it is not the
-native SDK version.
+on iOS. The npm packages are versioned independently of the native SDK.
 
 ### Updating to native SDK 2.2.0
 
@@ -36,7 +35,6 @@ and Route on the same native release. Initialize Core before mounting a map or
 using headless services. Vector-layer creation succeeds only after native
 `Ready`; superseded/cancelled updates reject with `cancelled`, and failed updates
 with `sdk_error`. `Ready` does not certify presentation of a rendered frame.
-See [verification](VERIFICATION.md) for release checks and their scope.
 
 ## Add a map to your app
 
@@ -45,7 +43,7 @@ See [verification](VERIFICATION.md) for release checks and their scope.
 From an Expo app, install Map, Core and the development client:
 
 ```sh
-npx expo install @globus-software/glmap @globus-software/glmap-core expo-dev-client
+npx expo install @globus-software/glmap@beta @globus-software/glmap-core@beta expo-dev-client
 ```
 
 Map depends on Core. Listing Core directly also lets your app import its
@@ -83,6 +81,29 @@ Commit or back up your own native-project changes before regenerating them.
 For apps that maintain native projects manually, apply the corresponding
 [config-plugin changes](packages/glmap-core/plugins/with-glmap-core.js) to the
 host; JavaScript imports alone do not configure native dependencies.
+
+**iOS host ownership:** the SDK plugins do not change your `AppDelegate`,
+`UIApplicationSceneManifest`, or location permission text. Configure the scene
+lifecycle appropriate to your Expo version and application (including scene
+support when targeting iOS 27); GLMap does not migrate it for you. The demo's
+explicit `with-expo-scenes` plugin adapts its pinned Expo blank template and is
+not part of the SDK plugins.
+
+If your app calls Core's foreground-location APIs, add your own explanation to
+`ios.infoPlist` in `app.json`, for example:
+
+```json
+{
+  "NSLocationWhenInUseUsageDescription": "Show your position on the map while you use the app."
+}
+```
+
+Map display, search and routing without device location do not require that
+permission. Preserve any existing location wording and custom scene configuration.
+When upgrading a host generated with an earlier GLMap plugin, review its native
+changes: the plugin does not undo previously written AppDelegate or Info.plist
+changes. Restore your app's settings from version control, or regenerate only
+when all native customizations are represented in your app config/plugins.
 
 ### 3. Create the map
 
@@ -186,8 +207,9 @@ platform hosts under `example/android/` and `example/ios/`.
 
 The catalog also has **Lifecycle checks** and **API checks** actions. Both exercise
 the public SDK's `GLMapView`, not a separate test map. Benchmarks are an explicit
-opt-in mode; see [VERIFICATION.md](VERIFICATION.md). To start Metro separately for
-an installed development build, run `npm run demo` from `example/`.
+opt-in mode; see the [demo code guide](example/README.md#entry-points-and-startup).
+To start Metro separately for an installed development build, run `npm run demo`
+from `example/`.
 
 Use **Search** with its offline option to explore the bundled Montenegro data.
 Online features and downloads require a suitable key. Enter one with the
@@ -221,8 +243,7 @@ one another; Search and Route do not pull in the map renderer.
 
 ## Contributing and licensing
 
-See [SOURCE.md](SOURCE.md) for package structure and API development, and
-[VERIFICATION.md](VERIFICATION.md) for tests and reporting guidance.
+See [SOURCE.md](SOURCE.md) for package structure and API development.
 
 See [LICENSE.txt](LICENSE.txt) and each package's license. Native SDK and map-data
 terms also apply; bundled map data is © OpenStreetMap contributors.

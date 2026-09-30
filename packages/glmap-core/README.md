@@ -7,12 +7,18 @@ the map renderer, Search or Route.
 ## Installation
 
 ```sh
-npx expo install @globus-software/glmap-core
+npx expo install @globus-software/glmap-core@beta
 ```
 
 For a Core-only app, add `@globus-software/glmap-core` to `expo.plugins` in
 `app.json`, then regenerate and rebuild your development client. Feature plugins
 include Core setup when you install Map, Search or Route.
+
+The SDK plugins leave your iOS AppDelegate, scene manifest and location permission
+text unchanged. Before calling `startLocationUpdates()`, set your own
+`ios.infoPlist.NSLocationWhenInUseUsageDescription` in `app.json`. Your app owns
+its scene lifecycle; GLMap does not migrate it. If an older plugin already
+modified native files, restore or review those changes explicitly when upgrading.
 
 Requires React Native 0.86, Expo 57, React 19, Android API 24+ or iOS 16.4+, and
 native GLMap Core 2.2.0. Expo Go and web are not supported. See the

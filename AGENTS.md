@@ -22,16 +22,18 @@ examples and tests.
 - Test config plugins through Expo prebuild when changing native host integration.
 - Use the native versions recorded in `native-sdk.json`; do not silently change
   versions or add machine-specific paths.
-- Run `npm run typecheck --workspace example`, `node --test tests/example.test.cjs`,
-  `python3 scripts/check-modules.py`, `python3 tests/run.py` and
+- Run `npm run typecheck --workspace example`, `node --test tests/*.test.cjs`,
+  `python3 scripts/check-modules.py`, `python3 tests/run.py`,
   `python3 tests/downloads.py`, `python3 tests/readiness.py`,
   `python3 tests/vector_updates.py` and `python3 scripts/check-vector-api.py`.
-  Re-run Android/iOS
-  integration suites for API or platform changes, and API/lifecycle suites whenever
-  the native SDK pin changes.
-- Report checks actually performed. Distinguish host tests, emulator/simulator
-  runs, unsigned archives, signed physical-device runs and authenticated services.
-  See [VERIFICATION.md](VERIFICATION.md).
+  Re-run Android/iOS integration suites for API or platform changes, and
+  API/lifecycle suites whenever the native SDK pin changes.
+- Package versions and Core dependency versions belong in each package's
+  `package.json`; Gradle and podspecs read them there. Keep current README install
+  commands on `@beta`, not a hard-coded prerelease version.
+- Report checks actually performed in the chat, not in committed release reports.
+  Distinguish host tests, emulator/simulator runs, unsigned archives,
+  signed physical-device runs and authenticated services.
 
 ## Documentation and repository hygiene
 
